@@ -1,7 +1,4 @@
 function App() {
-  const appName = import.meta.env.VITE_APP_NAME;
-  console.log(`apiUrl : ${appName}`);
-
   return (
     <>
       <div className="flex items-center justify-center min-h-screen">
