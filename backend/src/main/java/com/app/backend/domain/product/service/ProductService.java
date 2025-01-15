@@ -102,4 +102,8 @@ public class ProductService {
             product.setStatus(modifyProductReqBody.status());
         }
     }
+
+    public void flush() {
+        this.productRepository.flush();
+    }
 }
