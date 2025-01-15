@@ -40,7 +40,9 @@ public class UserService {
                 .role("ROLE_USER")
                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        return user;
     }
 
 }
