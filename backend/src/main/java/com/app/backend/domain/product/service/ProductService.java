@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,5 +22,9 @@ public class ProductService {
                 .stock(amount)
                 .build();
         return this.productRepository.save(product);
+    }
+
+    public Optional<Product> findById(long id) {
+        return this.productRepository.findById(id);
     }
 }
