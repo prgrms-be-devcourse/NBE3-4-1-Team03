@@ -25,6 +25,7 @@ public enum ErrorCode {
     PRODUCT_DUPLICATION(HttpStatus.BAD_REQUEST, false, "P001", "이미 존재하는 제품"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, false, "P002", "제품 정보가 존재하지 않음"),
     PRODUCT_OUT_OF_STOCK(HttpStatus.BAD_REQUEST, false, "P003", "제품 재고 부족"),
+    PRODUCT_SORT_NOT_EXISTS(HttpStatus.NOT_FOUND, false, "P004", "요청한 정렬 조건이 존재하지 않음"),
 
     //Order
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, false, "O001", "주문 정보가 존재하지 않음"),

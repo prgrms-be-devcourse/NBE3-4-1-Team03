@@ -7,4 +7,5 @@ public class ProductException extends DomainException {
     public ProductException(ErrorCode errorCode) {
         super(errorCode);
     }
+
 }

@@ -10,6 +10,8 @@ import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.MethodNotAllowedException;
 
 @Slf4j
@@ -58,6 +60,35 @@ public class GlobalExceptionHandler {
         final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
         return ResponseEntity.status(errorCode.getStatus())
                              .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
+    }
+
+    /**
+     * HandlerMethodValidationException 발생 시(@Valid 또는 @Validated 에서 바인딩 에러)
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<RsData<Void>> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        log.error("handleHandlerMethodValidationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
+    }
+
+    /**
+     *
+     * MethodArgumentTypeMismatchException 예외 발생 시
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<RsData<Void>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e) {
+        log.error("handleMethodArgumentTypeMismatchException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
     }
 
     /**
