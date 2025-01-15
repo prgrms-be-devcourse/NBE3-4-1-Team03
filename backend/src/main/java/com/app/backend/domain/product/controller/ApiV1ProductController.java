@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("api/v1/products")
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ApiV1ProductController {
     private final ProductService productService;
@@ -68,7 +68,7 @@ public class ApiV1ProductController {
             Boolean status
     ) {}
 
-    @PatchMapping("{id}")
+    @PatchMapping("/{id}")
     @Transactional
     public RsData<Void> modify(
             @PathVariable long id,
@@ -87,7 +87,7 @@ public class ApiV1ProductController {
         );
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     @Transactional
     public RsData<Void> delete(
             @PathVariable long id
