@@ -193,4 +193,12 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+### Querydsl ###
+**/generated/**/querydsl/
+**/generated/**/querydsl/**
+
+### Querydsl: Ignore specific Java files ###
+**/generated/**/Q*.java
+**/generated/**/Q*.class
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,java,gradle
