@@ -4,6 +4,7 @@ import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.app.backend.global.error.exception.ErrorCode.EMAIL_DUPLICATION;
@@ -14,6 +15,7 @@ import static com.app.backend.global.error.exception.ErrorCode.INVALID_INPUT_VAL
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public User signup(
             String email,
@@ -35,7 +37,7 @@ public class UserService {
 
         User user = User.builder()
                 .email(email)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .name(name)
                 .address(address)
                 .detailAddress(detailAddress)
