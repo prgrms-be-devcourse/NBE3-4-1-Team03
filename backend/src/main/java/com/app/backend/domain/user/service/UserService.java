@@ -1,5 +1,6 @@
 package com.app.backend.domain.user.service;
 
+import com.app.backend.domain.user.dto.request.UserSignupRequest;
 import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.repository.UserRepository;
@@ -17,31 +18,24 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User signup(
-            String email,
-            String password,
-            String name,
-            String address,
-            String detailAddress,
-            String phone
-    ) {
+    public User signup(UserSignupRequest req) {
         userRepository
-                .findByEmail(email)
+                .findByEmail(req.getEmail())
                 .ifPresent(user -> {
                     throw new UserException(EMAIL_DUPLICATION);
                 });
 
-        if (address == null || address.trim().isEmpty()) {
+        if (req.getAddress() == null || req.getAddress().trim().isEmpty()) {
             throw new UserException(INVALID_INPUT_VALUE);
         }
 
         User user = User.builder()
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .name(name)
-                .address(address)
-                .detailAddress(detailAddress)
-                .phone(phone)
+                .email(req.getEmail())
+                .password(passwordEncoder.encode(req.getPassword()))
+                .name(req.getName())
+                .address(req.getAddress())
+                .detailAddress(req.getDetailAddress())
+                .phone(req.getPhone())
                 .status("ACTIVATED")
                 .role("ROLE_USER")
                 .build();

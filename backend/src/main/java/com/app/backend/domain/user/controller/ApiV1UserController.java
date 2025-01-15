@@ -24,14 +24,7 @@ public class ApiV1UserController {
     @PostMapping("/signup")
     @Transactional
     public RsData<Void> signup(@Valid @RequestBody UserSignupRequest userSignupRequest) {
-        User user = userService.signup(
-                userSignupRequest.getEmail(),
-                userSignupRequest.getPassword(),
-                userSignupRequest.getName(),
-                userSignupRequest.getAddress(),
-                userSignupRequest.getDetailAddress(),
-                userSignupRequest.getPhone()
-        );
+        User user = userService.signup(userSignupRequest);
 
         return new RsData<>(
                     true,
