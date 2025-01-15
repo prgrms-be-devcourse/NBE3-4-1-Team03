@@ -54,7 +54,7 @@ public class ApiV1ProductController {
         );
     }
 
-    record ModifyProductReqBody(
+    public record ModifyProductReqBody(
             @NotBlank
             String name,
 
@@ -72,4 +72,23 @@ public class ApiV1ProductController {
             @NotNull
             Boolean status
     ) {}
+
+    @PatchMapping("{id}")
+    @Transactional
+    public RsData<Void> modify(
+            @PathVariable long id,
+            @RequestBody @Valid ModifyProductReqBody modifyProductReqBody
+    ) {
+        Product product = productService.findById(id).get();
+
+        this.productService.modify(product, modifyProductReqBody);
+
+        this.productService.flush();
+
+        return new RsData<>(
+                true,
+                "200",
+                "%d번 상품이 수정되었습니다.".formatted(product.getId())
+        );
+    }
 }
