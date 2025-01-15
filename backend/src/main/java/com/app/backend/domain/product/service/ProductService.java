@@ -16,16 +16,20 @@ import org.springframework.stereotype.Service;
 public class ProductService {
     private final ProductRepository productRepository;
 
+    private static final String CREATED_DATE = "created_date";
+    private static final String PRICE = "price";
+    private static final String NAME = "name";
+
     public Page<Product> findBySortedPaged(
             int page, int size, String sort) {
         // TODO : 오름차순 / 내림차순 구분 있어야 할것 같음.(Sort 사용한 구현 가능!!)
         Pageable pageable = PageRequest.of(page,size);
         switch (sort) {
-            case "created_date":
+            case CREATED_DATE:
                 return productRepository.findByOrderByCreatedDateDesc(pageable);
-            case "price":
+            case PRICE:
                 return productRepository.findByOrderByPriceDesc(pageable);
-            case "name":
+            case NAME:
                 return productRepository.findByOrderByNameDesc(pageable);
             default:
                 throw new ProductException(ErrorCode.PRODUCT_SORT_NOT_EXISTS);
