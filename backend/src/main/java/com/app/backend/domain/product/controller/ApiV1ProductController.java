@@ -38,4 +38,22 @@ public class ApiV1ProductController {
             @Min(0)
             int amount
     ){}
+
+    @PostMapping
+    @Transactional
+    public RsData<Void> add(@RequestBody @Valid AddProductReqBody addProductReqBody) {
+
+        Product product = productService.add(
+                addProductReqBody.name,
+                addProductReqBody.description,
+                addProductReqBody.price,
+                addProductReqBody.amount
+        );
+
+        return new RsData<>(
+                true,
+                "201",
+                "%d번 상품이 등록되었습니다.".formatted(product.getId())
+        );
+    }
 }
