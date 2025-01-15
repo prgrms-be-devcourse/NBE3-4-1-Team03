@@ -13,7 +13,6 @@ import lombok.*;
 @Entity
 @Table(name = "Users")
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
