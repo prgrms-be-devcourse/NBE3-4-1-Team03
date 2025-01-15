@@ -7,6 +7,7 @@ import com.app.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.app.backend.global.error.exception.ErrorCode.EMAIL_DUPLICATION;
 import static com.app.backend.global.error.exception.ErrorCode.INVALID_INPUT_VALUE;
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public User signup(UserSignupRequest req) {
         userRepository
                 .findByEmail(req.getEmail())
