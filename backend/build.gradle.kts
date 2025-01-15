@@ -40,6 +40,7 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
+
     annotationProcessor("org.projectlombok:lombok")
     //Jakarta Annotations API
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
@@ -56,3 +57,27 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+//Querydsl - Start
+val generatedDir = file("src/main/generated")
+
+sourceSets {
+    main {
+        java {
+            srcDir(generatedDir)
+        }
+    }
+}
+
+tasks {
+    compileJava {
+        options.annotationProcessorGeneratedSourcesDirectory = generatedDir
+    }
+
+    clean {
+        doFirst {
+            delete(generatedDir)
+        }
+    }
+}
+//Querydsl - End
