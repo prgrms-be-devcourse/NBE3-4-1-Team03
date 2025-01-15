@@ -201,4 +201,7 @@ gradle-app.setting
 **/generated/**/Q*.java
 **/generated/**/Q*.class
 
+### IntelliJ IDEA Ignore Options ###
+.idea/**
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,java,gradle
