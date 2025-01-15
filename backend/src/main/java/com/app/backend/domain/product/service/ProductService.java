@@ -74,10 +74,6 @@ public class ProductService {
         return this.productRepository.save(product);
     }
 
-    public Optional<Product> findById(long id) {
-        return this.productRepository.findById(id);
-    }
-
     public void modify(Product product, ApiV1ProductController.ModifyProductReqBody modifyProductReqBody) {
         if (modifyProductReqBody.name() != null) {
             product.setName(modifyProductReqBody.name());
