@@ -74,7 +74,7 @@ public class ApiV1ProductController {
             @PathVariable long id,
             @RequestBody @Valid ModifyProductReqBody modifyProductReqBody
     ) {
-        Product product = productService.findById(id).get();
+        Product product = productService.findById(id);
 
         this.productService.modify(product, modifyProductReqBody);
 
@@ -92,7 +92,7 @@ public class ApiV1ProductController {
     public RsData<Void> delete(
             @PathVariable long id
     ) {
-        Product product = this.productService.findById(id).get();
+        Product product = this.productService.findById(id);
 
         this.productService.delete(product);
 

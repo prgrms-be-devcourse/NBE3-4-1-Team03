@@ -2,11 +2,11 @@ package com.app.backend.domain.product.service;
 
 import com.app.backend.domain.product.controller.ApiV1ProductController;
 import com.app.backend.domain.product.entity.Product;
+import com.app.backend.domain.product.exception.ProductException;
 import com.app.backend.domain.product.repository.ProductRepository;
+import com.app.backend.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +24,9 @@ public class ProductService {
         return this.productRepository.save(product);
     }
 
-    public Optional<Product> findById(long id) {
-        return this.productRepository.findById(id);
+    public Product findById(long id) {
+        return this.productRepository.findById(id)
+                .orElseThrow(() -> new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
     public void modify(Product product, ApiV1ProductController.ModifyProductReqBody modifyProductReqBody) {
