@@ -53,4 +53,23 @@ public class ApiV1ProductController {
                 "%d번 상품이 등록되었습니다.".formatted(product.getId())
         );
     }
+
+    record ModifyProductReqBody(
+            @NotBlank
+            String name,
+
+            @NotBlank
+            String description,
+
+            @NotNull
+            @DecimalMin(value = "100.00")
+            BigDecimal price,
+
+            @NotNull
+            @Min(0)
+            Integer amount,
+
+            @NotNull
+            Boolean status
+    ) {}
 }
