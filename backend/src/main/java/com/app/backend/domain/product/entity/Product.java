@@ -42,10 +42,10 @@ public class Product extends BaseEntity {
     @DecimalMin(value = "100.00", message = "가격은 100원 이상")
     private BigDecimal price;
 
-    @Column(name = "product_stock", nullable = false)
+    @Column(name = "product_stock")
     @Min(value=0, message = "재고 수량은 음수 불가")
     private int stock;
 
-    @Column(name = "product_status", nullable = false)
+    @Column(name = "product_status")
     private boolean status;
 }
