@@ -74,6 +74,11 @@ public class ProductService {
         return this.productRepository.save(product);
     }
 
+    public Product findById(long id) {
+        return this.productRepository.findById(id)
+                .orElseThrow(() -> new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
     public void modify(Product product, ApiV1ProductController.ModifyProductReqBody modifyProductReqBody) {
         if (modifyProductReqBody.name() != null) {
             product.setName(modifyProductReqBody.name());
