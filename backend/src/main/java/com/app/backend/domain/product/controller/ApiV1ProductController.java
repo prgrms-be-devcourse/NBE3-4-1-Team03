@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 public class ApiV1ProductController {
     private final ProductService productService;
 
-    record AddProductReqBody(
+    public record AddProductReqBody(
             @NotBlank
             String name,
 
@@ -40,12 +40,7 @@ public class ApiV1ProductController {
     @Transactional
     public RsData<Void> add(@RequestBody @Valid AddProductReqBody addProductReqBody) {
 
-        Product product = productService.add(
-                addProductReqBody.name,
-                addProductReqBody.description,
-                addProductReqBody.price,
-                addProductReqBody.amount
-        );
+        Product product = productService.add(addProductReqBody);
 
         return new RsData<>(
                 true,

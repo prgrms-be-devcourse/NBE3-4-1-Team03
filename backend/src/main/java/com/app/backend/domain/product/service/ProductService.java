@@ -13,9 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -66,13 +63,13 @@ public class ProductService {
         return productRepository.findById(productId);
     }
 
-    public Product add(String name, String description, BigDecimal price, int amount) {
+    public Product add(ApiV1ProductController.AddProductReqBody addProductReqBody) {
         Product product = Product
                 .builder()
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(amount)
+                .name(addProductReqBody.name())
+                .description(addProductReqBody.description())
+                .price(addProductReqBody.price())
+                .stock(addProductReqBody.amount())
                 .build();
         return this.productRepository.save(product);
     }
