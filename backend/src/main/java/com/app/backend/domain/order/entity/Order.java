@@ -15,100 +15,51 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * PackageName : com.app.backend.domain.order.entity
- * FileName    : Order
- * Author      : 강찬우
- * Date        : 25. 1. 14.
- * Description : 주문 정보 엔티티
- */
 @Entity
 @Table(name = "Orders")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Order extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", nullable = false, updatable = false)
-    private Long id;    //주문 ID
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User customer;  //주문 회원
+    private User customer;
 
-    @Column(nullable = false)
-    private String orderNumber; //주문 번호
+    @Column(unique = true, nullable = false, updatable = false)
+    private String orderNumber;
 
     @Column(name = "order_total_amount", nullable = false)
-    private int totalAmount;    //전체 주문 수량
+    private int totalAmount;
 
-    @Column(name = "order_total_price", nullable = false)
-    private BigDecimal totalPrice;  //전체 주문 금액
+    @Column(name = "order_total_price", precision = 10, scale = 2, nullable = false)
+    @DecimalMin(value = "0.00")
+    private BigDecimal totalPrice;
 
     @Column(name = "order_address", nullable = false)
-    private String address; //배송 주소
+    private String address;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status", nullable = false)
-    private OrderStatus status; //주문 상태: [Ordered, Shipped, Delivered, Cancelled]
+    private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<OrderProduct> orderProducts = new ArrayList<>();   //주문 제품 목록
-
-    private Order(final User customer,
-                  final String orderNumber,
-                  final int totalAmount,
-                  final BigDecimal totalPrice,
-                  final String address,
-                  final OrderStatus status) {
-        setRelationshipWithUser(customer);
-        this.orderNumber = orderNumber;
-        this.totalAmount = totalAmount;
-        this.totalPrice = totalPrice;
-        this.address = address;
-        this.status = status;
-    }
-
-    public static Order of(final User customer,
-                           final String orderNumber,
-                           final int totalAmount,
-                           final BigDecimal totalPrice,
-                           final String address,
-                           final OrderStatus status) {
-        return new Order(customer,
-                         orderNumber,
-                         totalAmount,
-                         totalPrice,
-                         address,
-                         status);
-    }
-
-    //==================== 연관관계 메서드 ====================//
-
-    private void setRelationshipWithUser(final User user) {
-        this.customer = user;
-//        user.getOrders().add(this);
-    }
-
-    //==================== 수정 메서드 ====================//
-
-    /**
-     * 주문 상태 변경
-     *
-     * @param newStatus - 새로운 주문 상태
-     * @return 주문 정보
-     */
-    public Order updateStatus(final OrderStatus newStatus) {
-        if (this.status != newStatus) this.status = newStatus;
-        return this;
-    }
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
 }

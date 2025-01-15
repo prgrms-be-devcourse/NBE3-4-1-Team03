@@ -1,15 +1,12 @@
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:tcp://localhost/~/test;MODE=MYSQL;DATABASE_TO_LOWER=TRUE
-    username: sa
-    password:
-  sql:
-    init:
-      mode: always
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3360/coffee?serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     properties:
