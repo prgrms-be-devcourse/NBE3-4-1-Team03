@@ -24,4 +24,8 @@ public class AppConfig {
         return objectMapper;
     }
 
+    public static String getSiteFrontUrl() {
+        return "http://localhost:3000";
+    }
+
 }
