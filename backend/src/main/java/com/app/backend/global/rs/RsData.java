@@ -1,5 +1,6 @@
 package com.app.backend.global.rs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
@@ -21,6 +22,11 @@ public class RsData<T> {
 
     public RsData(@NonNull final Boolean isSuccess, @NonNull final String code, @NonNull final String message) {
         this(isSuccess, code, message, null);
+    }
+
+    @JsonIgnore
+    public int getCodeAsInt() {
+        return Integer.parseInt(code);
     }
 
 }
