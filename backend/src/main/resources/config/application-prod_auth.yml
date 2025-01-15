@@ -1,0 +1,28 @@
+#spring:
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: ${SMTP_GOOGLE_USERNAME}
+#    password: ${SMTP_GOOGLE_PASSWORD}
+#    properties:
+#      mail:
+#        smtp:
+#          starttls:
+#            enable: true
+#            required: true
+#          auth: true
+#          connectiontimeout: 5000
+#          timeout: 5000
+#          writetimeout: 5000
+
+#JWT config
+#jwt:
+#  secret: ${JWT_SECRET}
+#  issuer: ${JWT_ISSUER}
+#  token:
+#    access-expiration: 1800
+#    refresh-expiration: 604800
+
+#Email config
+#email:
+#  from: no-reply@app.com

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: backend
+  config:
+    additional-location: classpath:/config/
+  profiles:
+    group:
+      prod: [ "prod_auth", "prod_db", "prod_web", "prod_server" ]
+      dev: [ "dev_auth", "dev_db", "dev_web", "dev_server" ]
+    active: dev
