@@ -14,13 +14,13 @@ public class RsData<T> {
     @NonNull
     private final Boolean isSuccess;
     @NonNull
-    private final String  message;
-    @NonNull
     private final String  code;
+    @NonNull
+    private final String  message;
     private final T       data;
 
-    public RsData(final boolean isSuccess, final String message, final String code) {
-        this(isSuccess, message, code, null);
+    public RsData(@NonNull final Boolean isSuccess, @NonNull final String code, @NonNull final String message) {
+        this(isSuccess, code, message, null);
     }
 
 }

@@ -27,9 +27,7 @@ public class GlobalExceptionHandler {
         log.error("handleMethodNotAllowedException", e);
         final ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
         return ResponseEntity.status(errorCode.getStatus())
-                             .body(new RsData<>(false,
-                                                errorCode.getMessage(),
-                                                errorCode.getCode()));
+                             .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
     }
 
     /**
@@ -40,13 +38,12 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<RsData<Void>> handleHttpRequestMethodNotSupportedException(
-            HttpRequestMethodNotSupportedException e) {
+            HttpRequestMethodNotSupportedException e
+    ) {
         log.error("handleHttpRequestMethodNotSupportedException", e);
         final ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
         return ResponseEntity.status(errorCode.getStatus())
-                             .body(new RsData<>(false,
-                                                errorCode.getMessage(),
-                                                errorCode.getCode()));
+                             .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
     }
 
     /**
@@ -60,9 +57,7 @@ public class GlobalExceptionHandler {
         log.error("handleBindException", e);
         final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
         return ResponseEntity.status(errorCode.getStatus())
-                             .body(new RsData<>(false,
-                                                errorCode.getMessage(),
-                                                errorCode.getCode()));
+                             .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
     }
 
     /**
@@ -75,9 +70,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<RsData<Void>> handleOrderException(OrderException e) {
         log.error("handleOrderException", e);
         return ResponseEntity.status(e.getErrorCode().getStatus())
-                             .body(new RsData<>(false,
-                                                e.getErrorCode().getMessage(),
-                                                e.getErrorCode().getCode()));
+                             .body(new RsData<>(false, e.getErrorCode().getCode(), e.getErrorCode().getMessage()));
     }
 
     @ExceptionHandler(DomainException.class)
@@ -85,8 +78,8 @@ public class GlobalExceptionHandler {
         log.error("handleDomainException", e);
         return ResponseEntity.status(e.getErrorCode().getStatus())
                              .body(new RsData<>(false,
-                                                e.getErrorCode().getMessage(),
-                                                e.getErrorCode().getCode()));
+                                                e.getErrorCode().getCode(),
+                                                e.getErrorCode().getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -95,8 +88,8 @@ public class GlobalExceptionHandler {
         final ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.internalServerError()
                              .body(new RsData<>(false,
-                                                errorCode.getMessage(),
-                                                errorCode.getCode()));
+                                                errorCode.getCode(),
+                                                errorCode.getMessage()));
     }
 
 }

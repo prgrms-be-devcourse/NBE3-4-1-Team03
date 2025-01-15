@@ -32,20 +32,21 @@ public class Product extends BaseEntity {
     @Column(name = "product_name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "product_description", nullable = false)
+    @Column(name = "product_description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "product_image")
     private String image;
 
     @Column(name = "product_price", precision = 10, scale = 2, nullable = false)
-    @DecimalMin(value = "100.00", message = "가격은 100원 이상")
+    @DecimalMin(value = "100.00", message = "")
     private BigDecimal price;
 
-    @Column(name = "product_stock")
-    @Min(value=0, message = "재고 수량은 음수 불가")
+    @Column(name = "product_stock", nullable = false)
+    @Min(value = 0, message = "")
     private int stock;
 
-    @Column(name = "product_status")
+    @Column(name = "product_status", nullable = false)
     private boolean status;
+
 }
