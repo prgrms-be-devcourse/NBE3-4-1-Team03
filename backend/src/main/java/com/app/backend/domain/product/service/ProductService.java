@@ -54,4 +54,8 @@ public class ProductService {
     public void flush() {
         this.productRepository.flush();
     }
+
+    public void delete(Product product) {
+        this.productRepository.delete(product);
+    }
 }
