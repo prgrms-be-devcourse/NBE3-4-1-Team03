@@ -13,9 +13,9 @@ import lombok.*;
 @Entity
 @Table(name = "Users")
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
 
     @Id
@@ -43,9 +43,9 @@ public class User extends BaseEntity {
     private String phone;
 
     @Column(name = "user_status", nullable = false)
-    private String status;
+    private String status = "ACTIVATED";
 
     @Column(name = "user_role", nullable = false)
-    private String role;
+    private String role = "ROLE_USER";
 
 }
