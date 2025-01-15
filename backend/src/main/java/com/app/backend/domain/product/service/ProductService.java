@@ -14,13 +14,13 @@ import java.util.Optional;
 public class ProductService {
     private final ProductRepository productRepository;
 
-    public Product add(String name, String description, BigDecimal price, int amount) {
+    public Product add(ApiV1ProductController.AddProductReqBody addProductReqBody) {
         Product product = Product
                 .builder()
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(amount)
+                .name(addProductReqBody.name())
+                .description(addProductReqBody.description())
+                .price(addProductReqBody.price())
+                .stock(addProductReqBody.amount())
                 .build();
         return this.productRepository.save(product);
     }
