@@ -23,12 +23,12 @@ public class ApiV1UserController {
 
     @PostMapping("/signup")
     @Transactional
-    public RsData<Void> signup(@Valid @RequestBody UserSignupRequest userSignupRequest) {
-        User user = userService.signup(userSignupRequest);
+    public RsData<Void> signup(@Valid @RequestBody UserSignupRequest req) {
+        userService.signup(req);
 
         return new RsData<>(
                     true,
-                    "%s님, 회원가입을 축하합니다.".formatted(user.getName()),
+                    "%s님, 회원가입을 축하합니다.".formatted(req.getName()),
                     "201"
                 );
     }

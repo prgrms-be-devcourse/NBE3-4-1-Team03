@@ -20,7 +20,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User signup(UserSignupRequest req) {
+    public void signup(UserSignupRequest req) {
         userRepository
                 .findByEmail(req.getEmail())
                 .ifPresent(user -> {
@@ -43,8 +43,6 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
-
-        return user;
     }
 
 }
