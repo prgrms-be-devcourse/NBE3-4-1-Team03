@@ -19,10 +19,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Clean Gradle cache
+        working-directory: ./backend
+        run: rm -rf ~/.gradle/caches/
+
       - name: Grant execute permission for gradlew
         working-directory: ./backend
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
         working-directory: ./backend
-        run: ./gradlew clean build
+        run: ./gradlew clean build --no-daemon
+
