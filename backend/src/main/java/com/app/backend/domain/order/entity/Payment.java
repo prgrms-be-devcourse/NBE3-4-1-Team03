@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "Payments")
 @Getter
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Payment extends BaseEntity {
@@ -52,5 +52,19 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus status;
+
+    public static Payment of(final Order order,
+                             final User customer,
+                             final PaymentMethod method,
+                             final BigDecimal paidAmount) {
+        Payment payment = Payment.builder()
+                                 .order(order)
+                                 .method(method)
+                                 .paidAmount(paidAmount)
+                                 .build();
+        payment.customer = customer;
+//        customer.getPayments().add(this);   //TODO: 연관관계 설정 확인 필요
+        return payment;
+    }
 
 }
