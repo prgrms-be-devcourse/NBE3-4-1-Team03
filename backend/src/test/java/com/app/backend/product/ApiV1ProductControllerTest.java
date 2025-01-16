@@ -448,4 +448,218 @@ public class ApiV1ProductControllerTest {
                 .andExpect(jsonPath("$.message").value("상품 '상품 10'이(가) 삭제되었습니다."))
                 .andExpect(jsonPath("$.code").value("200"));
     }
+
+    @Test
+    @DisplayName("상품 전체 수정")
+    void modifyProductTest1() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/1")
+                                .content("""
+                                        {
+                                            "name": "modifiedProduct",
+                                            "description": "modifiedDescription",
+                                            "price": 30000,
+                                            "amount": 3000,
+                                            "status": false
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 'modifiedProduct'이(가) 수정되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+
+        Product product = productService.findById(1L);
+
+        assertThat(product.getName()).isEqualTo("modifiedProduct");
+        assertThat(product.getDescription()).isEqualTo("modifiedDescription");
+        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("30000.00"));
+        assertThat(product.getStock()).isEqualTo(3000);
+        assertThat(product.getStatus()).isFalse();
+    }
+
+    @Test
+    @DisplayName("상품 이름 수정")
+    void modifyProductTest2() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/2")
+                                .content("""
+                                        {
+                                            "name": "modifiedName"
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 'modifiedName'이(가) 수정되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+
+        Product product = productService.findById(2L);
+
+        assertThat(product.getName()).isEqualTo("modifiedName");
+        assertThat(product.getDescription()).isEqualTo("상세설명");
+        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("9500.00"));
+        assertThat(product.getStock()).isEqualTo(100);
+        assertThat(product.getStatus()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품 설명 수정")
+    void modifyProductTest3() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/3")
+                                .content("""
+                                        {
+                                            "description": "modifiedDescription"
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 '상품 3'이(가) 수정되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+
+        Product product = productService.findById(3L);
+
+        assertThat(product.getName()).isEqualTo("상품 3");
+        assertThat(product.getDescription()).isEqualTo("modifiedDescription");
+        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("9000.00"));
+        assertThat(product.getStock()).isEqualTo(100);
+        assertThat(product.getStatus()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품 가격 수정")
+    void modifyProductTest4() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/4")
+                                .content("""
+                                        {
+                                            "price": 2000
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 '상품 4'이(가) 수정되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+
+        Product product = productService.findById(4L);
+
+        assertThat(product.getName()).isEqualTo("상품 4");
+        assertThat(product.getDescription()).isEqualTo("상세설명");
+        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("2000.00"));
+        assertThat(product.getStock()).isEqualTo(100);
+        assertThat(product.getStatus()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품 수량 수정")
+    void modifyProductTest5() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/5")
+                                .content("""
+                                        {
+                                            "amount": 50
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 '상품 5'이(가) 수정되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+
+        Product product = productService.findById(5L);
+
+        assertThat(product.getName()).isEqualTo("상품 5");
+        assertThat(product.getDescription()).isEqualTo("상세설명");
+        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("8000.00"));
+        assertThat(product.getStock()).isEqualTo(50);
+        assertThat(product.getStatus()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품 상태 수정")
+    void modifyProductTest6() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/6")
+                                .content("""
+                                        {
+                                            "status": false
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 '상품 6'이(가) 수정되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+
+        Product product = productService.findById(6L);
+
+        assertThat(product.getName()).isEqualTo("상품 6");
+        assertThat(product.getDescription()).isEqualTo("상세설명");
+        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("7500.00"));
+        assertThat(product.getStock()).isEqualTo(100);
+        assertThat(product.getStatus()).isFalse();
+    }
 }
