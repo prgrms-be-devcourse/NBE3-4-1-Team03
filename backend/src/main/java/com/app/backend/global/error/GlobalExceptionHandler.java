@@ -4,7 +4,9 @@ import com.app.backend.domain.order.exception.OrderException;
 import com.app.backend.global.error.exception.DomainException;
 import com.app.backend.global.error.exception.ErrorCode;
 import com.app.backend.global.rs.RsData;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -121,6 +123,39 @@ public class GlobalExceptionHandler {
                              .body(new RsData<>(false,
                                                 errorCode.getCode(),
                                                 errorCode.getMessage()));
+    }
+
+    /**
+     * 데이타 검증 실패 발생 시
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<RsData<Void>> handleConstraintViolationException(ConstraintViolationException e) {
+        log.error("handleConstraintViolationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false,
+                        errorCode.getMessage(),
+                        errorCode.getCode()));
+    }
+
+
+    /**
+     * 유저(User) 관련 예외 발생 시
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<RsData<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.error("handleDataIntegrityViolationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false,
+                        errorCode.getMessage(),
+                        errorCode.getCode()));
     }
 
 }
