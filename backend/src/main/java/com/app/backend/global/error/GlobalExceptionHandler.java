@@ -10,11 +10,20 @@ import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.MethodNotAllowedException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<RsData<Void>> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        log.error("handleHandlerMethodValidationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                             .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
+    }
 
     /**
      * 지원하지 않는 HTTP Method 호출 시(자바 서블릿)
