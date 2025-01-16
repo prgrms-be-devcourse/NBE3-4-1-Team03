@@ -4,6 +4,7 @@ import com.app.backend.global.config.AppConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +29,12 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/*/signup").permitAll()
                         .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products/*").permitAll()
                 )
                 .headers(headers ->
                         headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
