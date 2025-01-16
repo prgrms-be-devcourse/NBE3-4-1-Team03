@@ -3,6 +3,8 @@ package com.app.backend.domain.user.service;
 import com.app.backend.domain.user.dto.request.UserInfoModifyRequest;
 import com.app.backend.domain.user.dto.request.UserSignupRequest;
 import com.app.backend.domain.user.entity.User;
+import com.app.backend.domain.user.entity.UserRole;
+import com.app.backend.domain.user.entity.UserStatus;
 import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +36,8 @@ public class UserService {
                 .address(req.getAddress())
                 .detailAddress(req.getDetailAddress())
                 .phone(req.getPhone())
-                .status("ACTIVATED")
-                .role("ROLE_USER")
+                .status(UserStatus.getDefaultStatus().toString())
+                .role(UserRole.getDefaultRole().toString())
                 .build();
 
         userRepository.save(user);

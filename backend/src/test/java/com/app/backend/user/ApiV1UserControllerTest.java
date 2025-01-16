@@ -359,15 +359,15 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(true))
                 .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 불러왔습니다."))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.data[1].name").value("test1"))
-                .andExpect(jsonPath("$.data[1].email").value("test123@test.com"))
-                .andExpect(jsonPath("$.data[1].status").value("ACTIVATED"))
-                .andExpect(jsonPath("$.data[1].role").value("ROLE_USER"))
-                .andExpect(jsonPath("$.data[1].phone").value("01012345678"))
-                .andExpect(jsonPath("$.data[1].address").value("address"))
-                .andExpect(jsonPath("$.data[1].detailAddress").value("detailAddress"))
-                .andExpect(jsonPath("$.data[1].created_date").exists())
-                .andExpect(jsonPath("$.data[1].modified_date").exists());
+                .andExpect(jsonPath("$.data.name").value("test1"))
+                .andExpect(jsonPath("$.data.email").value("test123@test.com"))
+                .andExpect(jsonPath("$.data.status").value("ACTIVATED"))
+                .andExpect(jsonPath("$.data.role").value("ROLE_USER"))
+                .andExpect(jsonPath("$.data.phone").value("01012345678"))
+                .andExpect(jsonPath("$.data.address").value("address"))
+                .andExpect(jsonPath("$.data.detailAddress").value("detailAddress"))
+                .andExpect(jsonPath("$.data.created_date").exists())
+                .andExpect(jsonPath("$.data.modified_date").exists());
     }
 
     @Test
@@ -438,10 +438,10 @@ public class ApiV1UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[1].name").value("modified"))
-                .andExpect(jsonPath("$.data[1].address").value("modified address"))
-                .andExpect(jsonPath("$.data[1].detailAddress").value("modified detailAddress"))
-                .andExpect(jsonPath("$.data[1].phone").value("01087654321"));
+                .andExpect(jsonPath("$.data.name").value("modified"))
+                .andExpect(jsonPath("$.data.address").value("modified address"))
+                .andExpect(jsonPath("$.data.detailAddress").value("modified detailAddress"))
+                .andExpect(jsonPath("$.data.phone").value("01087654321"));
     }
 
     @Test

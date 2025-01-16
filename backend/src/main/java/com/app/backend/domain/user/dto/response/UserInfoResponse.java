@@ -29,13 +29,13 @@ public class UserInfoResponse {
     public UserInfoResponse(User user) {
         this.name = user.getName();
         this.email = user.getEmail();
+        this.address = user.getAddress();
+        this.detailAddress = user.getDetailAddress();
         this.status = user.getStatus();
         this.role = user.getRole();
         this.phone = user.getPhone();
         this.created_date = user.getCreatedDate();
         this.modified_date = user.getModifiedDate();
-        this.address = user.getAddress();
-        this.detailAddress = user.getDetailAddress();
     }
 
 }
