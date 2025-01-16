@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "Orders")
 @Getter
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Order extends BaseEntity {
@@ -60,6 +60,36 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
     private List<OrderProduct> orderProducts = new ArrayList<>();
+
+    public static Order of(final User customer,
+                           final String orderNumber,
+                           final int totalAmount,
+                           final BigDecimal totalPrice,
+                           final String address) {
+        Order order = Order.builder()
+                           .orderNumber(orderNumber)
+                           .totalAmount(totalAmount)
+                           .totalPrice(totalPrice)
+                           .address(address)
+                           .status(OrderStatus.ORDERED)
+                           .build();
+        order.customer = customer;
+//        customer.getOrders().add(order);    //TODO: 연관관계 설정 확인 필요
+        return order;
+    }
+
+    /**
+     * 주문 상태 수정
+     *
+     * @param newOrderStatus - 새로운 주문 상태
+     * @return 주문 정보 엔티티
+     */
+    public Order updateOrderStatus(final OrderStatus newOrderStatus) {
+        if (status != newOrderStatus)
+            status = newOrderStatus;
+        return this;
+    }
 
 }
