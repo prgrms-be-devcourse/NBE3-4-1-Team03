@@ -123,7 +123,7 @@ public class ProductControllerTest {
     void itemsTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Page=2&Size=3")
+                        get("/api/v1/products?page=2&size=3")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -155,11 +155,11 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 전체 조회 (Sort 파라미터 전달 : Price")
+    @DisplayName("상품 전체 조회 (sort 파라미터 전달 : price")
     void itemsTest3() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Sort=price")
+                        get("/api/v1/products?sort=price")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -191,11 +191,11 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 전체 조회 (Sort 파라미터 전달 : Name")
+    @DisplayName("상품 전체 조회 (sort 파라미터 전달 : name")
     void itemsTest4() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Sort=name")
+                        get("/api/v1/products?sort=name")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -227,11 +227,11 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 전체 조회 (Direction 오름차순 정렬)")
+    @DisplayName("상품 전체 조회 (direction 오름차순 정렬)")
     void itemsTest5() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Direction=asc")
+                        get("/api/v1/products?direction=asc")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -262,15 +262,49 @@ public class ProductControllerTest {
         ;
     }
 
+    @Test
+    @DisplayName("상품 전체 조회 (keyword 검색)")
+    void itemsTest6() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        get("/api/v1/products?keyword=1")
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
 
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("items"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("상품 페이지 전체조회"))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.totalItems").value(2))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(1))
+                .andExpect(jsonPath("$.data.pageSize").value(10))
+                .andExpect(jsonPath("$.data.hasNext").value(false))
+                .andExpect(jsonPath("$.data.hasPrevious").value(false))
+                .andExpect(jsonPath("$.data.isLast").value(true))
+                .andExpect(jsonPath("$.data.product_info").exists())
+                .andExpect(jsonPath("$.data.product_info[0].product_id").value(10))
+                .andExpect(jsonPath("$.data.product_info[0].product_name").value("상품 10"))
+                .andExpect(jsonPath("$.data.product_info[0].product_price").value(5500.00))
+                .andExpect(jsonPath("$.data.product_info[0].product_amount").value(100))
+                .andExpect(jsonPath("$.data.product_info[0].product_status").value(true))
+        ;
+    }
 
 
     @Test
-    @DisplayName("상품 전체 조회 예외 (Page 파라미터값 이상)")
+    @DisplayName("상품 전체 조회 예외 (page 파라미터값 이상)")
     void itemsExceptionTest1() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Page=xx")
+                        get("/api/v1/products?page=xx")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -288,11 +322,11 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 전체 조회 예외 (Sort 파라미터 값 이상)")
+    @DisplayName("상품 전체 조회 예외 (sort 파라미터 값 이상)")
     void itemsExceptionTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Sort=dinamic")
+                        get("/api/v1/products?sort=dinamic")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -310,11 +344,11 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 전체 조회 예외 (Direction 파라미터 값 이상)")
+    @DisplayName("상품 전체 조회 예외 (direction 파라미터 값 이상)")
     void itemsExceptionTest3() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        get("/api/v1/products?Direction=under")
+                        get("/api/v1/products?direction=under")
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )

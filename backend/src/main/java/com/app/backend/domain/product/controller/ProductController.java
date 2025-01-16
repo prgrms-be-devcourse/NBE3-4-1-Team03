@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,22 +26,25 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
+    @Transactional(readOnly = true)
     public RsData<ProductPageDto<ProductWithoutDescriptionDto>> items(
-            @Valid @RequestParam(name = "Page", defaultValue = "1") @Min(1) int page,
-            @Valid @RequestParam(name = "Size", defaultValue = "10") @Min(1) int size,
-            @Valid @RequestParam(name = "Sort", defaultValue = "created_date") String sort,
-            @Valid @RequestParam(name = "Direction", defaultValue = "desc") String direction
+            @Valid @RequestParam(name = "page", defaultValue = "1") @Min(1) int page,
+            @Valid @RequestParam(name = "size", defaultValue = "10") @Min(1) int size,
+            @Valid @RequestParam(name = "sort", defaultValue = "created_date") String sort,
+            @Valid @RequestParam(name = "direction", defaultValue = "desc") String direction,
+            @Valid @RequestParam(name = "keyword", defaultValue= "") String keyword
     ){
         return new RsData<>(
                 true,
                 "200",
                 "상품 페이지 전체조회",
                 new ProductPageDto<>(
-                productService.findBySortedPaged(page-1, size, sort, direction)
+                productService.findBySortedPaged(page-1, size, sort, direction, keyword)
                         .map(ProductWithoutDescriptionDto::new)));
     }
 
     @GetMapping("/{product_id}")
+    @Transactional(readOnly = true)
     public RsData<ProductDetailDto> item(
             @PathVariable @Valid Long product_id
     ){
