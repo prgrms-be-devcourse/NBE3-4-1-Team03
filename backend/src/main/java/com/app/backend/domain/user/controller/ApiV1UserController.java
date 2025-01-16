@@ -1,5 +1,6 @@
 package com.app.backend.domain.user.controller;
 
+import com.app.backend.domain.user.dto.request.UserChangePasswordRequest;
 import com.app.backend.domain.user.dto.request.UserInfoModifyRequest;
 import com.app.backend.domain.user.dto.request.UserSignupRequest;
 import com.app.backend.domain.user.dto.response.UserInfoResponse;
@@ -63,6 +64,41 @@ public class ApiV1UserController {
                 true,
                 "200",
                 "회원 정보를 성공적으로 수정하였습니다."
+        );
+    }
+
+    @PatchMapping("/users/{userId}/password")
+    @Transactional
+    public RsData<Void> changePassword(
+        @PathVariable Long userId,
+        @Valid @RequestBody UserChangePasswordRequest req
+    ) {
+        User user = userService.getUserById(userId);
+
+        // TODO (rq로 회원인증 후 동작하도록 구현)
+
+        userService.changePassword(user, req);
+
+        return new RsData<>(
+                true,
+                "200",
+                "비밀번호를 성공적으로 변경하였습니다."
+        );
+    }
+
+    @DeleteMapping("/users/{userId}")
+    @Transactional
+    public RsData<Void> deleteUser(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+
+        // TODO (rq로 회원인증 후 동작하도록 구현)
+
+        userService.deleteUser(user);
+
+        return new RsData<>(
+                true,
+                "200",
+                "탈퇴가 성공적으로 이루어졌습니다."
         );
     }
 

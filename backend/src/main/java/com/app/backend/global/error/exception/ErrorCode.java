@@ -20,6 +20,8 @@ public enum ErrorCode {
     EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, false, "U001", "이미 사용중인 이메일"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, false, "U002", "회원 정보가 존재하지 않음"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, false, "U003", "잘못된 자격 증명"),
+    PASSWORD_SAME_AS_CURRENT(HttpStatus.BAD_REQUEST, false, "U004", "새 비밀번호가 현재 비밀번호와 동일"),
+    USER_DELETED(HttpStatus.BAD_REQUEST, false, "U005", "탈퇴한 회원"),
 
     //Product
     PRODUCT_DUPLICATION(HttpStatus.BAD_REQUEST, false, "P001", "이미 존재하는 제품"),
