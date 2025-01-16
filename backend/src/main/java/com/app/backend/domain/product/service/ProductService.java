@@ -55,8 +55,7 @@ public class ProductService {
         if(keyword.isBlank()) return findBySortedPagedWithoutSearchKeyword(page, size, sort, direction);
         Sort sortOption = makeSortOption(sort,direction);
         Pageable pageable = PageRequest.of(page, size, sortOption);
-        keyword = "%" + keyword + "%";
-        return productRepository.findByNameLike(keyword, pageable);
+        return productRepository.findByNameContaining(keyword, pageable);
     }
 
     public Optional<Product> findById(Long productId) {
