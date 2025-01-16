@@ -59,6 +59,7 @@ public class Order extends BaseEntity {
     @Column(name = "order_status", nullable = false)
     private OrderStatus status;
 
+    @Builder.Default
     @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
