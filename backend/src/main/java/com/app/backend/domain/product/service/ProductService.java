@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,19 +22,26 @@ public class ProductService {
     private static final String NAME = "name";
 
     public Page<Product> findBySortedPaged(
-            int page, int size, String sort) {
-        // TODO : 오름차순 / 내림차순 구분 있어야 할것 같음.(Sort 사용한 구현 가능!!)
-        Pageable pageable = PageRequest.of(page,size);
+            int page, int size, String sort, String direction) {
+        Sort sortOption;
+        // TODO : direction값 검증
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
         switch (sort) {
             case CREATED_DATE:
-                return productRepository.findByOrderByCreatedDateDesc(pageable);
+                sortOption = Sort.by(sortDirection, "createDate");
+                break;
             case PRICE:
-                return productRepository.findByOrderByPriceDesc(pageable);
+                sortOption = Sort.by(sortDirection, "price");
+                break;
             case NAME:
-                return productRepository.findByOrderByNameDesc(pageable);
+                sortOption = Sort.by(sortDirection, "name");
+                break;
             default:
                 throw new ProductException(ErrorCode.PRODUCT_SORT_NOT_EXISTS);
         }
+
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+        return productRepository.findAll(pageable);
     }
 
     public Optional<Product> findById(Long productId) {

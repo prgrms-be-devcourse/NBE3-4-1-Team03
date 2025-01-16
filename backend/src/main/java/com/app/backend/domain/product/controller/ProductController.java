@@ -28,14 +28,15 @@ public class ProductController {
     public RsData<ProductPageDto<ProductWithoutDescriptionDto>> items(
             @Valid @RequestParam(name = "Page", defaultValue = "1") @Min(1) int page,
             @Valid @RequestParam(name = "Size", defaultValue = "10") @Min(1) int size,
-            @Valid @RequestParam(name = "Sort", defaultValue = "created_date") String sort
+            @Valid @RequestParam(name = "Sort", defaultValue = "created_date") String sort,
+            @Valid @RequestParam(name = "Direction", defaultValue = "desc") String direction
     ){
         return new RsData<>(
                 true,
                 "200",
                 "상품 페이지 전체조회",
                 new ProductPageDto<>(
-                productService.findBySortedPaged(page-1, size, sort)
+                productService.findBySortedPaged(page-1, size, sort, direction)
                         .map(ProductWithoutDescriptionDto::new)));
     }
 
