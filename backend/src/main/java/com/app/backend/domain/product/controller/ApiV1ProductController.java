@@ -4,9 +4,7 @@ import com.app.backend.domain.product.dto.ProductDetailDto;
 import com.app.backend.domain.product.dto.ProductPageDto;
 import com.app.backend.domain.product.dto.ProductWithoutDescriptionDto;
 import com.app.backend.domain.product.entity.Product;
-import com.app.backend.domain.product.exception.ProductException;
 import com.app.backend.domain.product.service.ProductService;
-import com.app.backend.global.error.exception.ErrorCode;
 import com.app.backend.global.rs.RsData;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
@@ -18,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -49,13 +46,7 @@ public class ApiV1ProductController {
     public RsData<ProductDetailDto> item(
             @PathVariable @Valid Long product_id
     ){
-        Optional<Product> opProduct = productService.findById(product_id);
-
-        if(opProduct.isEmpty()){
-            throw new ProductException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-
-        Product product = opProduct.get();
+        Product product = productService.findById(product_id);
 
         return new RsData<>(true,
                 "200",

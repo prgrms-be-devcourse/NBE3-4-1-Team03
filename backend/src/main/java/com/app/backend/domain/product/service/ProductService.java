@@ -5,7 +5,6 @@ import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.exception.ProductException;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.global.error.exception.ErrorCode;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,10 +56,6 @@ public class ProductService {
         Sort sortOption = makeSortOption(sort,direction);
         Pageable pageable = PageRequest.of(page, size, sortOption);
         return productRepository.findByNameContaining(keyword, pageable);
-    }
-
-    public Optional<Product> findById(Long productId) {
-        return productRepository.findById(productId);
     }
 
     public Product add(ApiV1ProductController.AddProductReqBody addProductReqBody) {
