@@ -20,11 +20,15 @@ public enum ErrorCode {
     EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, false, "U001", "이미 사용중인 이메일"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, false, "U002", "회원 정보가 존재하지 않음"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, false, "U003", "잘못된 자격 증명"),
+    PASSWORD_SAME_AS_CURRENT(HttpStatus.BAD_REQUEST, false, "U004", "새 비밀번호가 현재 비밀번호와 동일"),
+    USER_DELETED(HttpStatus.BAD_REQUEST, false, "U005", "탈퇴한 회원"),
 
     //Product
     PRODUCT_DUPLICATION(HttpStatus.BAD_REQUEST, false, "P001", "이미 존재하는 제품"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, false, "P002", "제품 정보가 존재하지 않음"),
     PRODUCT_OUT_OF_STOCK(HttpStatus.BAD_REQUEST, false, "P003", "제품 재고 부족"),
+    PRODUCT_SORT_NOT_EXISTS(HttpStatus.NOT_FOUND, false, "P004", "요청한 정렬 조건이 존재하지 않음"),
+    PRODUCT_DIRECTION_NOT_EXISTS(HttpStatus.NOT_FOUND, false, "P005", "요청한 정렬 방향이 존재하지 않음"),
 
     //Order
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, false, "O001", "주문 정보가 존재하지 않음"),

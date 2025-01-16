@@ -4,13 +4,16 @@ import com.app.backend.domain.order.exception.OrderException;
 import com.app.backend.global.error.exception.DomainException;
 import com.app.backend.global.error.exception.ErrorCode;
 import com.app.backend.global.rs.RsData;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.MethodNotAllowedException;
 
 @Slf4j
@@ -70,6 +73,35 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * HandlerMethodValidationException 발생 시(@Valid 또는 @Validated 에서 바인딩 에러)
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<RsData<Void>> handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        log.error("handleHandlerMethodValidationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
+    }
+
+    /**
+     *
+     * MethodArgumentTypeMismatchException 예외 발생 시
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<RsData<Void>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e) {
+        log.error("handleMethodArgumentTypeMismatchException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false, errorCode.getCode(), errorCode.getMessage()));
+    }
+
+    /**
      * 주문(Order) 관련 예외 발생 시
      *
      * @param e
@@ -99,6 +131,39 @@ public class GlobalExceptionHandler {
                              .body(new RsData<>(false,
                                                 errorCode.getCode(),
                                                 errorCode.getMessage()));
+    }
+
+    /**
+     * 데이타 검증 실패 발생 시
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<RsData<Void>> handleConstraintViolationException(ConstraintViolationException e) {
+        log.error("handleConstraintViolationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false,
+                        errorCode.getMessage(),
+                        errorCode.getCode()));
+    }
+
+
+    /**
+     * 유저(User) 관련 예외 발생 시
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<RsData<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.error("handleDataIntegrityViolationException", e);
+        final ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(new RsData<>(false,
+                        errorCode.getMessage(),
+                        errorCode.getCode()));
     }
 
 }
