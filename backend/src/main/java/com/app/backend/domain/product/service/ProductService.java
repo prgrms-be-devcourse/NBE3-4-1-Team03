@@ -70,6 +70,7 @@ public class ProductService {
                 .description(addProductReqBody.description())
                 .price(addProductReqBody.price())
                 .stock(addProductReqBody.amount())
+                .status(addProductReqBody.status())
                 .build();
         return this.productRepository.save(product);
     }
