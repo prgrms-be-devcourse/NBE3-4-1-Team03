@@ -53,6 +53,35 @@ public class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("상품 단일 조회")
+    void itemTest1() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        get("/api/v1/products/1")
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("item"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("1번 상품 상세사항입니다."))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.name").value("상품 1"))
+                .andExpect(jsonPath("$.data.description").value("상세설명"))
+                .andExpect(jsonPath("$.data.price").value(10000.00))
+                .andExpect(jsonPath("$.data.amount").value(100))
+                .andExpect(jsonPath("$.data.status").value(true))
+        ;
+
+    }
+
+    @Test
     @DisplayName("상품 전체 조회 (default)")
     void itemsTest1() throws Exception {
         ResultActions resultActions = mockMvc
@@ -299,6 +328,28 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(false))
                 .andExpect(jsonPath("$.code").value("P005"))
                 .andExpect(jsonPath("$.message").value("요청한 정렬 방향이 존재하지 않음"))
+        ;
+    }
+
+    @Test
+    @DisplayName("상품 상세 조회 예외 (존재하지 않는 상품 Id)")
+    void itemExceptionTest1() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        get("/api/v1/products/121412414")
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("item"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("P002"))
+                .andExpect(jsonPath("$.message").value("제품 정보가 존재하지 않음"))
         ;
     }
 

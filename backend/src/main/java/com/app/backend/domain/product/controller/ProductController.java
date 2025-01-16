@@ -41,7 +41,7 @@ public class ProductController {
     }
 
     @GetMapping("/{product_id}")
-    public ProductDetailDto item(
+    public RsData<ProductDetailDto> item(
             @PathVariable @Valid Long product_id
     ){
         Optional<Product> opProduct = productService.findById(product_id);
@@ -52,7 +52,10 @@ public class ProductController {
 
         Product product = opProduct.get();
 
-        return new ProductDetailDto(product);
+        return new RsData<>(true,
+                "200",
+                "%d번 상품 상세사항입니다.".formatted(product_id),
+                new ProductDetailDto(product));
     }
 
 
