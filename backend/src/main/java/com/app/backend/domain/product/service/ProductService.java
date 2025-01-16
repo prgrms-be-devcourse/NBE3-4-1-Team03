@@ -21,13 +21,11 @@ public class ProductService {
     private static final String PRICE = "price";
     private static final String NAME = "name";
 
-    public Page<Product> findBySortedPaged(
-            int page, int size, String sort, String direction) {
-        Sort sortOption;
-        // TODO : direction값 검증
+    private Sort makeSortOption(String sort, String direction){
         if(!(direction.equals("asc") || direction.equals("desc"))){
             throw new ProductException(ErrorCode.PRODUCT_DIRECTION_NOT_EXISTS);
         }
+        Sort sortOption;
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
         switch (sort) {
             case CREATED_DATE:
@@ -42,9 +40,23 @@ public class ProductService {
             default:
                 throw new ProductException(ErrorCode.PRODUCT_SORT_NOT_EXISTS);
         }
+        return sortOption;
+    }
 
+    public Page<Product> findBySortedPagedWithoutSearchKeyword(
+            int page, int size, String sort, String direction) {
+        Sort sortOption = makeSortOption(sort, direction);
         Pageable pageable = PageRequest.of(page, size, sortOption);
         return productRepository.findAll(pageable);
+    }
+
+    public Page<Product> findBySortedPaged(
+            int page, int size, String sort, String direction, String keyword) {
+        if(keyword.isBlank()) return findBySortedPagedWithoutSearchKeyword(page, size, sort, direction);
+        Sort sortOption = makeSortOption(sort,direction);
+        Pageable pageable = PageRequest.of(page, size, sortOption);
+        keyword = "%" + keyword + "%";
+        return productRepository.findByNameLike(keyword, pageable);
     }
 
     public Optional<Product> findById(Long productId) {

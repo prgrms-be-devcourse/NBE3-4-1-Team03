@@ -26,17 +26,18 @@ public class ProductController {
 
     @GetMapping
     public RsData<ProductPageDto<ProductWithoutDescriptionDto>> items(
-            @Valid @RequestParam(name = "Page", defaultValue = "1") @Min(1) int page,
-            @Valid @RequestParam(name = "Size", defaultValue = "10") @Min(1) int size,
-            @Valid @RequestParam(name = "Sort", defaultValue = "created_date") String sort,
-            @Valid @RequestParam(name = "Direction", defaultValue = "desc") String direction
+            @Valid @RequestParam(name = "page", defaultValue = "1") @Min(1) int page,
+            @Valid @RequestParam(name = "size", defaultValue = "10") @Min(1) int size,
+            @Valid @RequestParam(name = "sort", defaultValue = "created_date") String sort,
+            @Valid @RequestParam(name = "direction", defaultValue = "desc") String direction,
+            @Valid @RequestParam(name = "keyword", defaultValue= "") String keyword
     ){
         return new RsData<>(
                 true,
                 "200",
                 "상품 페이지 전체조회",
                 new ProductPageDto<>(
-                productService.findBySortedPaged(page-1, size, sort, direction)
+                productService.findBySortedPaged(page-1, size, sort, direction, keyword)
                         .map(ProductWithoutDescriptionDto::new)));
     }
 
