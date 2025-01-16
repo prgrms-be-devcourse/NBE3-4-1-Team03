@@ -45,7 +45,7 @@ public class ApiV1ProductController {
         return new RsData<>(
                 true,
                 "201",
-                "%d번 상품이 등록되었습니다.".formatted(product.getId())
+                "상품 '%s'이(가) 등록되었습니다.".formatted(product.getName())
         );
     }
 
@@ -83,7 +83,7 @@ public class ApiV1ProductController {
         return new RsData<>(
                 true,
                 "200",
-                "%d번 상품이 수정되었습니다.".formatted(product.getId())
+                "상품 '%s'이(가) 수정되었습니다.".formatted(product.getName())
         );
     }
 
@@ -99,7 +99,7 @@ public class ApiV1ProductController {
         return new RsData<>(
                 true,
                 "200",
-                "%d번 상품이 삭제되었습니다.".formatted(product.getId())
+                "상품 '%s'이(가) 삭제되었습니다.".formatted(product.getName())
         );
     }
 }
