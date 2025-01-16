@@ -33,7 +33,10 @@ public class ApiV1ProductController {
 
             @NotNull
             @Min(0)
-            Integer amount
+            Integer amount,
+
+            @NotNull
+            Boolean status
     ){}
 
     @PostMapping
@@ -52,21 +55,16 @@ public class ApiV1ProductController {
     }
 
     public record ModifyProductReqBody(
-            @NotBlank
             String name,
 
-            @NotBlank
             String description,
 
-            @NotNull
             @DecimalMin(value = "100.00")
             BigDecimal price,
 
-            @NotNull
             @Min(0)
             Integer amount,
 
-            @NotNull
             Boolean status
     ) {}
 
