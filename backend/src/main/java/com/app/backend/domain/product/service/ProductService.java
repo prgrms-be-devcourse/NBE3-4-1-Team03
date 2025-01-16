@@ -25,10 +25,13 @@ public class ProductService {
             int page, int size, String sort, String direction) {
         Sort sortOption;
         // TODO : direction값 검증
+        if(!(direction.equals("asc") || direction.equals("desc"))){
+            throw new ProductException(ErrorCode.PRODUCT_DIRECTION_NOT_EXISTS);
+        }
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
         switch (sort) {
             case CREATED_DATE:
-                sortOption = Sort.by(sortDirection, "createDate");
+                sortOption = Sort.by(sortDirection, "createdDate");
                 break;
             case PRICE:
                 sortOption = Sort.by(sortDirection, "price");
