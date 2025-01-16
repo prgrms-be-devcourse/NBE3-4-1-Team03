@@ -9,7 +9,7 @@ export const useFetch = (endpoint, options) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log(`Base url : ${API_BASE_URL}`);
+  console.log(`요청주소 : ${API_BASE_URL}${endpoint}`);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,10 +17,12 @@ export const useFetch = (endpoint, options) => {
       setError(null);
       try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
         const result = await response.json();
+
+        if (!response.ok) {
+          setError(result.message || "Failed to fetch data");
+          return;
+        }
         setData(result);
       } catch (err) {
         setError(err.message);
