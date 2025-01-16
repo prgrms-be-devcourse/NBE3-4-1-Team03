@@ -28,6 +28,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/*/products").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products/*").permitAll()
                 )
                 .headers(headers ->
                         headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
