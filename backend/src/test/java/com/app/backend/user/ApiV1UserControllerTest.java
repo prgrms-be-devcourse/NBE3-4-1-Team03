@@ -2,6 +2,7 @@ package com.app.backend.user;
 
 import com.app.backend.domain.user.controller.ApiV1UserController;
 import com.app.backend.domain.user.entity.User;
+import com.app.backend.domain.user.entity.UserStatus;
 import com.app.backend.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -395,6 +396,48 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @DisplayName("회원정보 조회 - 탈퇴한 회원")
+    void profileTest3() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        // 회원 탈퇴
+        mockMvc.perform(
+                delete("/api/v1/users/" + user.getId())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isOk());
+
+        // 탈퇴한 회원 정보 조회 시도
+        ResultActions resultActions = mockMvc
+                .perform(
+                        get("/api/v1/users/" + user.getId())
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("getUser"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("U005"))
+                .andExpect(jsonPath("$.message").value("탈퇴한 회원"));
+    }
+
+    @Test
     @DisplayName("회원정보 수정")
     void modifyUserTest1() throws Exception {
         // 회원가입
@@ -518,6 +561,57 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(false))
                 .andExpect(jsonPath("$.message").value("올바르지 않은 입력값"))
                 .andExpect(jsonPath("$.code").value("C001"));
+    }
+
+    @Test
+    @DisplayName("회원정보 수정 - 탈퇴한 회원")
+    void modifyUserTest4() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        // 회원 탈퇴
+        mockMvc.perform(
+                delete("/api/v1/users/" + user.getId())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isOk());
+
+        // 탈퇴한 회원 정보 수정 시도
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/users/" + user.getId())
+                                .content("""
+                                        {
+                                            "name": "modified",
+                                            "address": "modified address",
+                                            "detailAddress": "modified detailAddress",
+                                            "phone": "01087654321"
+                                        }
+                                        """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("modifyUser"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("U005"))
+                .andExpect(jsonPath("$.message").value("탈퇴한 회원"));
     }
 
     @Test
@@ -733,6 +827,90 @@ public class ApiV1UserControllerTest {
         assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
         // 기존 비밀번호와 다른지 확인
         assertFalse(passwordEncoder.matches("test1234!", updatedUser.getPassword()));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴")
+    void deleteUserTest1() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        // 회원 탈퇴
+        ResultActions resultActions = mockMvc
+                .perform(
+                        delete("/api/v1/users/" + user.getId())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("deleteUser"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("탈퇴가 성공적으로 이루어졌습니다."));
+
+        // DB에서 사용자 다시 조회하여 상태가 DELETED로 변경되었는지 확인
+        User deletedUser = userRepository.findByEmail("test@test.com").orElseThrow();
+        assertEquals(UserStatus.DELETED.toString(), deletedUser.getStatus());
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - 이미 탈퇴한 회원")
+    void deleteUserTest2() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        // 첫 번째 회원 탈퇴
+        mockMvc.perform(
+                delete("/api/v1/users/" + user.getId())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isOk());
+
+        // 두 번째 회원 탈퇴 시도
+        ResultActions resultActions = mockMvc
+                .perform(
+                        delete("/api/v1/users/" + user.getId())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("deleteUser"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("U005"))
+                .andExpect(jsonPath("$.message").value("탈퇴한 회원"));
     }
 
 }

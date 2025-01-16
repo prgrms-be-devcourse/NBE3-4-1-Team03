@@ -63,4 +63,8 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
+    public void deleteUser() {
+        this.status = UserStatus.DELETED.toString();
+    }
+
 }

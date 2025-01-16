@@ -86,4 +86,20 @@ public class ApiV1UserController {
         );
     }
 
+    @DeleteMapping("/users/{userId}")
+    @Transactional
+    public RsData<Void> deleteUser(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+
+        // TODO (rq로 회원인증 후 동작하도록 구현)
+
+        userService.deleteUser(user);
+
+        return new RsData<>(
+                true,
+                "200",
+                "탈퇴가 성공적으로 이루어졌습니다."
+        );
+    }
+
 }

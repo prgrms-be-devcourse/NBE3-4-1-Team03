@@ -74,4 +74,8 @@ public class UserService {
         user.changePassword(passwordEncoder.encode(req.getNewPassword()));
     }
 
+    public void deleteUser(User user) {
+        user.deleteUser();
+    }
+
 }
