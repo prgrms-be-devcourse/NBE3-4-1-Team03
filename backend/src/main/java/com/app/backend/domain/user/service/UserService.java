@@ -1,5 +1,6 @@
 package com.app.backend.domain.user.service;
 
+import com.app.backend.domain.user.dto.request.UserChangePasswordRequest;
 import com.app.backend.domain.user.dto.request.UserInfoModifyRequest;
 import com.app.backend.domain.user.dto.request.UserSignupRequest;
 import com.app.backend.domain.user.entity.User;
@@ -45,14 +46,32 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(
+        User user = userRepository.findById(id).orElseThrow(
                 () -> new UserException(USER_NOT_FOUND)
         );
+
+        if (user.getStatus().equals(UserStatus.DELETED.toString())) {
+            throw new UserException(USER_DELETED);
+        }
+
+        return user;
     }
 
     @Transactional
     public void modifyInfo(User user, UserInfoModifyRequest req) {
         user.modifyInfo(req.getName(), req.getAddress(), req.getDetailAddress(), req.getPhone());
+    }
+
+    public void changePassword(User user, UserChangePasswordRequest req) {
+        if (!user.getEmail().equals(req.getEmail())) {
+            throw new UserException(INVALID_INPUT_VALUE);
+        }
+
+        if (passwordEncoder.matches(req.getNewPassword(), user.getPassword())) {
+            throw new UserException(PASSWORD_SAME_AS_CURRENT);
+        }
+
+        user.changePassword(passwordEncoder.encode(req.getNewPassword()));
     }
 
 }

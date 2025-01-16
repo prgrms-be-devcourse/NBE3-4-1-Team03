@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,6 +33,9 @@ public class ApiV1UserControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("회원가입")
@@ -513,6 +518,221 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(false))
                 .andExpect(jsonPath("$.message").value("올바르지 않은 입력값"))
                 .andExpect(jsonPath("$.code").value("C001"));
+    }
+
+    @Test
+    @DisplayName("비밀번호 찾기")
+    void changePasswordTest1() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        // 방금 생성된 유저 찾기
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        // 비밀번호 변경
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/users/" + user.getId() + "/password")
+                                .content("""
+                                        {
+                                            "email": "test123@test.com",
+                                            "newPassword": "modifyPassword1234!"
+                                        }
+                                        """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("changePassword"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("비밀번호를 성공적으로 변경하였습니다."));
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 이메일 불일치")
+    void changePasswordTest2() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        // 다른 이메일로 비밀번호 변경 시도
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/users/" + user.getId() + "/password")
+                                .content("""
+                                        {
+                                            "email": "wrong@test.com",
+                                            "newPassword": "modifyPassword1234!"
+                                        }
+                                        """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("changePassword"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("C001"))
+                .andExpect(jsonPath("$.message").value("올바르지 않은 입력값"));
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 새 비밀번호 형식 불일치")
+    void changePasswordTest3() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        // 잘못된 형식의 비밀번호로 변경 시도
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/users/" + user.getId() + "/password")
+                                .content("""
+                                        {
+                                            "email": "test123@test.com",
+                                            "newPassword": "short"
+                                        }
+                                        """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("changePassword"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("C001"))
+                .andExpect(jsonPath("$.message").value("올바르지 않은 입력값"));
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 현재 비밀번호와 동일")
+    void changePasswordTest4() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        // 현재 비밀번호와 동일한 비밀번호로 변경 시도
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/users/" + user.getId() + "/password")
+                                .content("""
+                                        {
+                                            "email": "test123@test.com",
+                                            "newPassword": "test1234!"
+                                        }
+                                        """.stripIndent())
+                                .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("changePassword"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.isSuccess").value(false))
+                .andExpect(jsonPath("$.code").value("U004"))
+                .andExpect(jsonPath("$.message").value("새 비밀번호가 현재 비밀번호와 동일"));
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 성공")
+    void changePasswordTest5() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+        String newPassword = "modifyPassword1234!";
+
+        // 비밀번호 변경
+        mockMvc.perform(
+                patch("/api/v1/users/" + user.getId() + "/password")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "newPassword": "%s"
+                                }
+                                """.formatted(newPassword))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isOk());
+
+        // DB에서 사용자 다시 조회
+        User updatedUser = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        // 새 비밀번호로 정상적으로 변경되었는지 확인
+        assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
+        // 기존 비밀번호와 다른지 확인
+        assertFalse(passwordEncoder.matches("test1234!", updatedUser.getPassword()));
     }
 
 }
