@@ -44,9 +44,9 @@ public class Product extends BaseEntity {
 
     @Column(name = "product_stock", nullable = false)
     @Min(value = 0, message = "")
-    private int stock;
+    private Integer stock;
 
     @Column(name = "product_status", nullable = false)
-    private boolean status;
+    private Boolean status;
 
 }

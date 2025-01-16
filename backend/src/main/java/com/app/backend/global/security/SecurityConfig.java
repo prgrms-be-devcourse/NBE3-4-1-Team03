@@ -1,20 +1,18 @@
 package com.app.backend.global.security;
 
 import com.app.backend.global.config.AppConfig;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,6 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/*/signup").permitAll()
                         .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*/products/*").permitAll()
                 )
                 .headers(headers ->
                         headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
