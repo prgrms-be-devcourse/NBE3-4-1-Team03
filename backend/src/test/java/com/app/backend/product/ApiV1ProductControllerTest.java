@@ -21,8 +21,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -430,5 +429,23 @@ public class ApiV1ProductControllerTest {
         assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("25000.00"));
         assertThat(product.getStock()).isEqualTo(1500);
         assertThat(product.getStatus()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품 삭제")
+    void deleteProductTest() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        delete("/api/v1/products/10")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("상품 '상품 10'이(가) 삭제되었습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
     }
 }
