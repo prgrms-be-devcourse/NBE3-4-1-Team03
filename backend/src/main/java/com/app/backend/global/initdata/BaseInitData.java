@@ -1,7 +1,6 @@
 package com.app.backend.global.initdata;
 
 import com.app.backend.domain.order.entity.Order;
-import com.app.backend.domain.order.entity.OrderStatus;
 import com.app.backend.domain.order.repository.OrderRepository;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.repository.ProductRepository;
@@ -50,7 +49,7 @@ public class BaseInitData {
                             .name(userStr)
                             .address(userStr + " address")
                             .detailAddress(userStr + " detail address")
-                            .phone("010-0000-0000")
+                            .phone("01000000000")
                             .status("ACTIVATED")
                             .role("ROLE_USER")
                             .build();
@@ -91,14 +90,8 @@ public class BaseInitData {
             Thread.sleep(1);
             String orderStr = "order" + String.format("%0" + String.valueOf("size").length() + "d", i);
             User   customer = users.get(RANDOM.nextInt(users.size()));
-            Order order = Order.builder()
-                               .customer(customer)
-                               .orderNumber(orderStr)
-                               .totalAmount(3)
-                               .totalPrice(BigDecimal.valueOf(50000))
-                               .address(customer.getAddress())
-                               .status(OrderStatus.ORDERED)
-                               .build();
+            Order order = Order.of(customer, orderStr, 3, BigDecimal.valueOf(50000),
+                                   "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
             orderRepository.save(order);
             orders.add(order);
         }
