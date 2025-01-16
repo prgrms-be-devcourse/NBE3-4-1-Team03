@@ -14,6 +14,8 @@ public class UserInfoResponse {
 
     private String address;
 
+    private String detailAddress;
+
     private String status;
 
     private String role;
@@ -33,6 +35,7 @@ public class UserInfoResponse {
         this.created_date = user.getCreatedDate();
         this.modified_date = user.getModifiedDate();
         this.address = user.getAddress();
+        this.detailAddress = user.getDetailAddress();
     }
 
 }

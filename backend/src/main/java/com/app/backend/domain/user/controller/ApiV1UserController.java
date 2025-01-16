@@ -41,8 +41,8 @@ public class ApiV1UserController {
 
         return new RsData<>(
                 true,
-                "회원 정보를 성공적으로 불러왔습니다.",
                 "200",
+                "회원 정보를 성공적으로 불러왔습니다.",
                 new UserInfoResponse(user)
         );
     }
@@ -61,8 +61,8 @@ public class ApiV1UserController {
 
         return new RsData<>(
                 true,
-                "회원 정보를 성공적으로 수정하였습니다.",
-                "200"
+                "200",
+                "회원 정보를 성공적으로 수정하였습니다."
         );
     }
 

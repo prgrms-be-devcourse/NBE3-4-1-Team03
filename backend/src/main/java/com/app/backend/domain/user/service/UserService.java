@@ -27,10 +27,6 @@ public class UserService {
                     throw new UserException(EMAIL_DUPLICATION);
                 });
 
-        if (req.getAddress() == null || req.getAddress().trim().isEmpty()) {
-            throw new UserException(INVALID_INPUT_VALUE);
-        }
-
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
@@ -54,7 +50,7 @@ public class UserService {
 
     @Transactional
     public void modifyInfo(User user, UserInfoModifyRequest req) {
-        user.modifyInfo(req.getName(), req.getAddress(), req.getPhone());
+        user.modifyInfo(req.getName(), req.getAddress(), req.getDetailAddress(), req.getPhone());
     }
 
 }

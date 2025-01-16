@@ -22,6 +22,10 @@ public class UserInfoModifyRequest {
     private String address;
 
     @NonNull
+    @NotBlank(message = "주소는 필수 입력값입니다")
+    private String detailAddress;
+
+    @NonNull
     @NotBlank
     @Pattern(regexp = "^(010\\d{8}|011\\d{7})$",
             message = "전화번호는 대시없이 입력하셔야 합니다.")
@@ -30,6 +34,7 @@ public class UserInfoModifyRequest {
     public UserInfoModifyRequest(User user) {
         this.name = user.getName();
         this.address = user.getAddress();
+        this.detailAddress = user.getDetailAddress();
         this.phone = user.getPhone();
     }
 

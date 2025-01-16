@@ -1,6 +1,8 @@
 package com.app.backend.user;
 
 import com.app.backend.domain.user.controller.ApiV1UserController;
+import com.app.backend.domain.user.entity.User;
+import com.app.backend.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class ApiV1UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @DisplayName("회원가입")
@@ -322,43 +327,48 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.code").value("U001"));
     }
 
-//    @Test
-//    @DisplayName("회원정보")
-//    void profileTest1() throws Exception {
-//        // 회원가입
-//        mockMvc.perform(
-//                post("/api/v1/signup")
-//                        .content("""
-//                                {
-//                                    "email": "test@test.com",
-//                                    "password": "test1234!",
-//                                    "name": "test1",
-//                                    "address": "address",
-//                                    "phone": "01012345678"
-//                                }
-//                                """.stripIndent())
-//                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
-//        ).andExpect(status().isCreated());
-//
-//        // 회원정보 조회 (같은 트랜잭션 내에서 실행)
-//        mockMvc.perform(
-//                        get("/api/v1/users/1")
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.isSuccess").value(true))
-//                .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 불러왔습니다."))
-//                .andExpect(jsonPath("$.code").value("200"))
-//                .andExpect(jsonPath("$.data.name").value("test1"))
-//                .andExpect(jsonPath("$.data.email").value("test@test.com"))
-//                .andExpect(jsonPath("$.data.status").value("ACTIVATED"))
-//                .andExpect(jsonPath("$.data.role").value("ROLE_USER"))
-//                .andExpect(jsonPath("$.data.phone").value("01012345678"))
-//                .andExpect(jsonPath("$.data.address").value("address"))
-//                .andExpect(jsonPath("$.data.created_date").exists())
-//                .andExpect(jsonPath("$.data.modified_date").exists());
-//    }
+    @Test
+    @DisplayName("회원정보")
+    void profileTest1() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        // 방금 생성된 유저 찾기
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        // 회원정보 조회
+        mockMvc.perform(
+                get("/api/v1/users/" + user.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 불러왔습니다."))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.data[1].name").value("test1"))
+                .andExpect(jsonPath("$.data[1].email").value("test123@test.com"))
+                .andExpect(jsonPath("$.data[1].status").value("ACTIVATED"))
+                .andExpect(jsonPath("$.data[1].role").value("ROLE_USER"))
+                .andExpect(jsonPath("$.data[1].phone").value("01012345678"))
+                .andExpect(jsonPath("$.data[1].address").value("address"))
+                .andExpect(jsonPath("$.data[1].detailAddress").value("detailAddress"))
+                .andExpect(jsonPath("$.data[1].created_date").exists())
+                .andExpect(jsonPath("$.data[1].modified_date").exists());
+    }
 
     @Test
     @DisplayName("회원정보 - 존재하지 않는 회원")
@@ -379,61 +389,26 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.code").value("U002"));
     }
 
-//    @Test
-//    @DisplayName("회원정보 수정")
-//    void modifyUserTest1() throws Exception {
-//        // 회원가입
-//        mockMvc.perform(
-//                post("/api/v1/signup")
-//                        .content("""
-//                                {
-//                                    "email": "test@test.com",
-//                                    "password": "test1234!",
-//                                    "name": "test1",
-//                                    "address": "address",
-//                                    "phone": "01012345678"
-//                                }
-//                                """.stripIndent())
-//                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
-//        );
-//
-//        // 회원정보 수정
-//        ResultActions resultActions = mockMvc
-//                .perform(
-//                        patch("/api/v1/users/1")
-//                                .content("""
-//                                        {
-//                                            "name": "modified",
-//                                            "address": "modified address",
-//                                            "phone": "01087654321"
-//                                        }
-//                                        """.stripIndent())
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print());
-//
-//        resultActions
-//                .andExpect(handler().handlerType(ApiV1UserController.class))
-//                .andExpect(handler().methodName("modifyUser"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.isSuccess").value(true))
-//                .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 수정하였습니다."))
-//                .andExpect(jsonPath("$.code").value("200"));
-//
-//        // 수정된 정보 확인
-//        mockMvc.perform(
-//                        get("/api/v1/users/1")
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.data[1].name").value("modified"))
-//                .andExpect(jsonPath("$.data[1].address").value("modified address"))
-//                .andExpect(jsonPath("$.data[1].phone").value("01087654321"));
-//    }
-
     @Test
-    @DisplayName("회원정보 수정 - 존재하지 않는 회원")
-    void modifyUserTest2() throws Exception {
+    @DisplayName("회원정보 수정")
+    void modifyUserTest1() throws Exception {
+        // 회원가입
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                {
+                                    "email": "test@test.com",
+                                    "password": "test1234!",
+                                    "name": "test1",
+                                    "address": "address",
+                                    "detailAddress": "detailAddress",
+                                    "phone": "01012345678"
+                                }
+                                """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        );
+
+        // 회원정보 수정
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/1")
@@ -441,6 +416,45 @@ public class ApiV1UserControllerTest {
                                         {
                                             "name": "modified",
                                             "address": "modified address",
+                                            "detailAddress": "modified detailAddress",
+                                            "phone": "01087654321"
+                                        }
+                                        """.stripIndent())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1UserController.class))
+                .andExpect(handler().methodName("modifyUser"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 수정하였습니다."))
+                .andExpect(jsonPath("$.code").value("200"));
+
+        // 수정된 정보 확인
+        mockMvc.perform(
+                        get("/api/v1/users/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[1].name").value("modified"))
+                .andExpect(jsonPath("$.data[1].address").value("modified address"))
+                .andExpect(jsonPath("$.data[1].detailAddress").value("modified detailAddress"))
+                .andExpect(jsonPath("$.data[1].phone").value("01087654321"));
+    }
+
+    @Test
+    @DisplayName("회원정보 수정 - 존재하지 않는 회원")
+    void modifyUserTest2() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/users/3")
+                                .content("""
+                                        {
+                                            "name": "modified",
+                                            "address": "modified address",
+                                            "detailAddress": "modified detailAddress",
                                             "phone": "01087654321"
                                         }
                                         """.stripIndent())
@@ -469,6 +483,7 @@ public class ApiV1UserControllerTest {
                                     "password": "test1234!",
                                     "name": "test1",
                                     "address": "address",
+                                    "detailAddress": "modified detailAddress",
                                     "phone": "01012345678"
                                 }
                                 """.stripIndent())
@@ -483,6 +498,7 @@ public class ApiV1UserControllerTest {
                                         {
                                             "name": "modified",
                                             "address": "modified address",
+                                            "detailAddress": "modified detailAddress",
                                             "phone": "010-1234-5678"
                                         }
                                         """.stripIndent())

@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 유저(User) 관련 예외 발생 시
+     * 데이타 검증 실패 발생 시
      *
      * @param e
      * @return
@@ -110,6 +110,13 @@ public class GlobalExceptionHandler {
                         errorCode.getCode()));
     }
 
+
+    /**
+     * 유저(User) 관련 예외 발생 시
+     *
+     * @param e
+     * @return
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<RsData<Void>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         log.error("handleDataIntegrityViolationException", e);
