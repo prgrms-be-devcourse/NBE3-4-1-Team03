@@ -32,17 +32,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
@@ -53,12 +50,15 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
  * Date        : 25. 1. 16.
  * Description :
  */
+@ActiveProfiles("test")
 //@MockBean(JpaMetamodelMappingContext.class)
 //NOTE: @MockBean(JpaMetamodelMappingContext.class) -> Spring Boot 3.4.0 이후 사용되지 않음, 제거 예정
 //@EnableJpaAuditing을 Application에 적용 시 JPA metamodel 에러가 발생하며, 해결을 위해 @EnableJpaAuditing을 따로 Config 클래스로
 //분리 후 적용 필요
 //@Import(TestConfig.class)
-@WebMvcTest(OrderController.class)
+//@WebMvcTest(OrderController.class)
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
 class OrderControllerTest {
 
     @MockitoBean
@@ -95,8 +95,6 @@ class OrderControllerTest {
         when(orderService.getOrderById(anyLong())).thenReturn(orderResponse);
         doNothing().when(orderService).updateOrderStatus(anyLong(), anyString());
     }
-
-    //TODO: 시큐리티 내 인증 객체 확인 후 로직 수행 테스트 필요, 추후 회원 도메인 설계 확인 후 시큐리티 항목 추가
 
     @Test
     @DisplayName("saveOrder")
@@ -268,19 +266,19 @@ class OrderControllerTest {
                      .andDo(print());
     }
 
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public Validator validator() {
-            return new LocalValidatorFactoryBean();
-        }
-
-        @Bean
-        public MethodValidationPostProcessor methodValidationPostProcessor() {
-            return new MethodValidationPostProcessor();
-        }
-
-    }
+//    @TestConfiguration
+//    static class TestConfig {
+//
+//        @Bean
+//        public Validator validator() {
+//            return new LocalValidatorFactoryBean();
+//        }
+//
+//        @Bean
+//        public MethodValidationPostProcessor methodValidationPostProcessor() {
+//            return new MethodValidationPostProcessor();
+//        }
+//
+//    }
 
 }

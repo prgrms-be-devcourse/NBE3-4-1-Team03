@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlGroup;
@@ -22,6 +23,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
  * Date        : 25. 1. 15.
  * Description :
  */
+@ActiveProfiles("test")
 @RepositoryTest
 @SqlGroup({
         @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_CLASS,
