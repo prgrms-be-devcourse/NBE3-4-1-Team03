@@ -19,11 +19,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Gradle
-        uses: gradle/wrapper-validation-action@v1
-        with:
-          gradle-version: 'latest'  # 최신 버전으로 설정
-
       - name: Grant execute permission for gradlew
         working-directory: ./backend
         run: chmod +x ./gradlew
