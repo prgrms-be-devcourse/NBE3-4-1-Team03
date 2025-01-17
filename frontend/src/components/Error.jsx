@@ -10,7 +10,10 @@ const Error = ({ errorMessage }) => (
 );
 
 Error.propTypes = {
-  errorMessage: PropTypes.oneOfType([PropTypes.string, PropTypes.null]),
+  errorMessage: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.oneOf([null]),
+  ]),
 };
 
 export default Error;
