@@ -22,23 +22,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests ->
-                authorizeRequests
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/*/signup").permitAll()
-                        .requestMatchers("/api/v1/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/*/products/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/*/products/*").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/api/*/products/*").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/*/products/*").permitAll()
-                )
-                .headers(headers ->
-                        headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
-                .csrf(csrf -> csrf.disable())
-                ;
+                                           authorizeRequests
+                                                   .requestMatchers("/h2-console/**").permitAll()
+                                                   .requestMatchers("/api/*/signup").permitAll()
+                                                   .requestMatchers("/api/v1/users/**").permitAll()
+                                                   .requestMatchers(HttpMethod.GET, "/api/*/products").permitAll()
+                                                   .requestMatchers(HttpMethod.GET, "/api/*/products/*").permitAll()
+                                                   .requestMatchers(HttpMethod.POST, "/api/*/products").permitAll()
+                                                   .requestMatchers(HttpMethod.POST, "/api/*/products/*").permitAll()
+                                                   .requestMatchers(HttpMethod.PATCH, "/api/*/products").permitAll()
+                                                   .requestMatchers(HttpMethod.PATCH, "/api/*/products/*").permitAll()
+                                                   .requestMatchers(HttpMethod.DELETE, "/api/*/products").permitAll()
+                                                   .requestMatchers(HttpMethod.DELETE, "/api/*/products/*").permitAll()
+                                                   .anyRequest().authenticated()
+            )
+            .headers(headers ->
+                             headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
+            .csrf(csrf -> csrf.disable())
+        ;
 
         return http.build();
     }
