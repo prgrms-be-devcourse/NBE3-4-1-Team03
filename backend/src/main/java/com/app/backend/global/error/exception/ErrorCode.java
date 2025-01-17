@@ -33,6 +33,7 @@ public enum ErrorCode {
     //Order
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, false, "O001", "주문 정보가 존재하지 않음"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, false, "O002", "잘못된 주문 상태"),
+    ORDER_BUYER_MISMATCH(HttpStatus.BAD_REQUEST, false, "O003", "주문 정보와 주문 회원 불일치"),
 
     //Payment
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, false, "E001", "결제 실패"),
