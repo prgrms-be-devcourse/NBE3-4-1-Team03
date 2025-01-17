@@ -21,6 +21,7 @@ import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.repository.OrderRepository;
 import com.app.backend.domain.order.service.OrderService;
 import com.app.backend.domain.user.entity.User;
+import com.app.backend.global.annotation.CustomWithMockAdmin;
 import com.app.backend.global.error.exception.ErrorCode;
 import com.app.backend.global.rs.RsData;
 import com.app.backend.global.util.ReflectionUtil;
@@ -51,14 +52,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
  * Description :
  */
 @ActiveProfiles("test")
-//@MockBean(JpaMetamodelMappingContext.class)
-//NOTE: @MockBean(JpaMetamodelMappingContext.class) -> Spring Boot 3.4.0 이후 사용되지 않음, 제거 예정
-//@EnableJpaAuditing을 Application에 적용 시 JPA metamodel 에러가 발생하며, 해결을 위해 @EnableJpaAuditing을 따로 Config 클래스로
-//분리 후 적용 필요
-//@Import(TestConfig.class)
-//@WebMvcTest(OrderController.class)
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 class OrderControllerTest {
 
     @MockitoBean
@@ -92,11 +87,12 @@ class OrderControllerTest {
         orderResponse = OrderResponse.of(order);
 
         when(orderService.saveOrder(anyLong(), any(OrderRequest.class))).thenReturn(1L);
-        when(orderService.getOrderById(anyLong())).thenReturn(orderResponse);
+        when(orderService.getOrderByIdAndUserId(anyLong(), anyLong())).thenReturn(orderResponse);
         doNothing().when(orderService).updateOrderStatus(anyLong(), anyString());
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("saveOrder")
     void saveOrder() throws Exception {
         //Given
@@ -121,6 +117,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("saveOrder, unknown product id")
     void saveOrder_unknownProductId() throws Exception {
         //Given
@@ -149,6 +146,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("saveOrder, unknown amount")
     void saveOrder_unknownAmount() throws Exception {
         //Given
@@ -177,6 +175,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("getOrderById")
     void getOrderById() throws Exception {
         //Given
@@ -199,6 +198,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("getOrderById, unknown id")
     void getOrderById_unknownId() throws Exception {
         //Given
@@ -223,6 +223,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("cancelOrder")
     void cancelOrder() throws Exception {
         //Given
@@ -243,6 +244,7 @@ class OrderControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("cancelOrder, unknown id")
     void cancelOrder_unknownId() throws Exception {
         //Given
@@ -265,20 +267,5 @@ class OrderControllerTest {
                      .andExpect(content().json(objectMapper.writeValueAsString(rsData)))
                      .andDo(print());
     }
-
-//    @TestConfiguration
-//    static class TestConfig {
-//
-//        @Bean
-//        public Validator validator() {
-//            return new LocalValidatorFactoryBean();
-//        }
-//
-//        @Bean
-//        public MethodValidationPostProcessor methodValidationPostProcessor() {
-//            return new MethodValidationPostProcessor();
-//        }
-//
-//    }
 
 }

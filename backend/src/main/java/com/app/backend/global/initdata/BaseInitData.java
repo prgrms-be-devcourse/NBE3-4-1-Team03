@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class BaseInitData {
     private final UserRepository    userRepository;
     private final ProductRepository productRepository;
     private final OrderRepository   orderRepository;
+    private final PasswordEncoder   passwordEncoder;
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
@@ -45,7 +47,7 @@ public class BaseInitData {
             String userStr = "user" + String.format("%0" + String.valueOf("size").length() + "d", i);
             User user = User.builder()
                             .email(userStr + "@mail.com")
-                            .password(userStr)
+                            .password(passwordEncoder.encode(userStr))
                             .name(userStr)
                             .address(userStr + " address")
                             .detailAddress(userStr + " detail address")

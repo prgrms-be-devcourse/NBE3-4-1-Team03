@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, OrderRepositoryCustom {
 
+    Optional<Order> findByIdAndCustomer_Id(Long id, Long customerId);
+
     List<Order> findByCustomer_Id(Long id);
 
     List<Order> findByCustomer_IdAndStatus(Long id, OrderStatus status);
