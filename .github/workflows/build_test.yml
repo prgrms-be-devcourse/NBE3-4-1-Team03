@@ -13,11 +13,6 @@ jobs:
         image: redis:latest
         ports:
           - 6379:6379
-        options: >
-          --entrypoint sh
-        command: >
-          -c "redis-server --notify-keyspace-events Ex"
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.3.4
@@ -35,3 +30,8 @@ jobs:
       - name: Build with Gradle
         working-directory: ./backend
         run: ./gradlew clean build --stacktrace --info
+
+      - name: Start Redis and configure
+        run: |
+          docker exec $(docker ps -q --filter "ancestor=redis:latest") redis-cli CONFIG SET notify-keyspace-events Ex
+          docker exec $(docker ps -q --filter "ancestor=redis:latest") redis-cli CONFIG GET notify-keyspace-events
