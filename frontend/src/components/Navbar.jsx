@@ -52,6 +52,14 @@ const Navbar = () => {
               상품 등록
             </Link>
           </li>
+          <li>
+            <Link
+              to="/cart"
+              className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              장바구니
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>
