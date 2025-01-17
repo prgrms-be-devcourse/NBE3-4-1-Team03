@@ -1,8 +1,6 @@
 package com.app.backend.global.security.handler;
 
 import com.app.backend.global.redis.repository.RedisRepository;
-import com.app.backend.global.rs.RsData;
-import com.app.backend.global.security.util.AuthResponseUtil;
 import com.app.backend.global.security.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

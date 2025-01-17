@@ -1,7 +1,6 @@
 package com.app.backend.global.security.handler;
 
 import com.app.backend.global.rs.RsData;
-import com.app.backend.global.security.util.AuthResponseUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

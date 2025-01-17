@@ -1,5 +1,6 @@
 package com.app.backend.global.security;
 
+import com.app.backend.global.config.AppConfig;
 import com.app.backend.global.security.filter.JwtAuthenticationFilter;
 import com.app.backend.global.security.filter.JwtAuthorizationFilter;
 import com.app.backend.global.security.handler.JwtLogoutHandler;
@@ -27,6 +28,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -64,7 +67,6 @@ public class SecurityConfig {
 
         http.headers(head -> head
                         .frameOptions(option -> option.sameOrigin()))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
@@ -102,19 +104,20 @@ public class SecurityConfig {
     }
 
 
-    public CorsConfigurationSource corsConfigurationSource() {
-
+    @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*"); // GET, POST ..
-        configuration.addAllowedOrigin("*"); // 허용 주소 -> (react 주소 추후 등록 필요)
+        // 허용할 오리진 설정
+        configuration.setAllowedOrigins(Arrays.asList("https://cdpn.io", AppConfig.getSiteFrontUrl()));
+        // 허용할 HTTP 메서드 설정
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        // 자격 증명 허용 설정
         configuration.setAllowCredentials(true);
-        configuration.addExposedHeader("Authorization");
-        configuration.setMaxAge(3600L);
+        // 허용할 헤더 설정
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        // CORS 설정을 소스에 등록
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
+        source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
 }
