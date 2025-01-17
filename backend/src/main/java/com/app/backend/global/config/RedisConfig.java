@@ -18,14 +18,10 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisContainer(RedisConnectionFactory connectionFactory,
             RedisKeyListener listener) {
-        System.out.println("Checking Redis Connection...");
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        System.out.println("Checking Redis Connection...");
         container.setConnectionFactory(connectionFactory);
-        System.out.println("Checking Redis Connection...");
         // 만료 이벤트 리스너 추가
         container.addMessageListener(listener, new ChannelTopic("__keyevent@0__:expired"));
-        System.out.println("Checking Redis Connection...");
         return container;
     }
 

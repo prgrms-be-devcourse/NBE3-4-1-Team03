@@ -2,7 +2,6 @@ package com.app.backend.global.redis.listener;
 
 import com.app.backend.domain.product.service.ProductService;
 import com.app.backend.global.redis.repository.RedisRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -13,13 +12,6 @@ import org.springframework.stereotype.Component;
 public class RedisKeyListener implements MessageListener {
     private final ProductService productService;
     private final RedisRepository redisRepository;
-
-    @PostConstruct
-    public void init() {
-        System.out.println("RedisKeyListener initialized with:");
-        System.out.println("ProductService: " + (productService != null));
-        System.out.println("RedisRepository: " + (redisRepository != null));
-    }
 
     @Override
     public void onMessage(Message message, byte[] pattern) {

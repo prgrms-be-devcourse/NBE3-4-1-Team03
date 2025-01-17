@@ -1,16 +1,17 @@
 package com.app.backend.global.security;
 
 import com.app.backend.global.config.AppConfig;
+import com.app.backend.global.redis.repository.RedisRepository;
+import com.app.backend.global.rs.RsData;
 import com.app.backend.global.security.filter.JwtAuthenticationFilter;
 import com.app.backend.global.security.filter.JwtAuthorizationFilter;
 import com.app.backend.global.security.handler.JwtLogoutHandler;
 import com.app.backend.global.security.handler.JwtLogoutSuccessHandler;
-import com.app.backend.global.security.util.JwtUtil;
 import com.app.backend.global.security.util.AuthResponseUtil;
-import com.app.backend.global.redis.repository.RedisRepository;
-import com.app.backend.global.rs.RsData;
+import com.app.backend.global.security.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,10 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
