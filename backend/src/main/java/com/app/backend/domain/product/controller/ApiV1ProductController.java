@@ -147,4 +147,6 @@ public class ApiV1ProductController {
                 "상품 '%s'이(가) 삭제되었습니다.".formatted(product.getName())
         );
     }
+    
+
 }

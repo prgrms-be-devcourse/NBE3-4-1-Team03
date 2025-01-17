@@ -115,13 +115,23 @@ public class ProductService {
         if(product.getStock() < amount) return false;
 
         product.setStock(product.getStock()-amount);
-        String redisKey = user_id + "_" + product_id;
-        redisRepository.save(redisKey,amount,15, TimeUnit.SECONDS);
+        // TODO : Key값 전달하기
+        // TODO : 중복된 Key를 만드는 요청이 들어온다면?
+        String redisKey = "order-%s_%s".formatted(user_id,product_id);
+        String redisKeyForValue = "orderValue-%s_%s".formatted(user_id,product_id);
+        redisRepository.save(redisKey,amount,4, TimeUnit.MINUTES);
+        redisRepository.save(redisKeyForValue,amount,5, TimeUnit.MINUTES);
         return true;
     }
 
     @Transactional
     public void deleteCacheAfterPayment(String redisKey){
         redisRepository.delete(redisKey);
+    }
+
+    @Transactional
+    public void restoreStock(Long productId, Integer amount) {
+        Product product = this.findById(productId);
+        product.setStock(product.getStock()+amount);
     }
 }
