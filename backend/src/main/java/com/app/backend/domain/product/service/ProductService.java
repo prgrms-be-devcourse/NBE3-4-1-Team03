@@ -5,6 +5,8 @@ import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.exception.ProductException;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.global.error.exception.ErrorCode;
+import com.app.backend.global.redis.repository.RedisRepository;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final RedisRepository redisRepository;
 
     private static final String CREATED_DATE = "created_date";
     private static final String PRICE = "price";
@@ -106,17 +109,34 @@ public class ProductService {
         this.productRepository.delete(product);
     }
 
-    public boolean checkStockAvailable(Long product_id, Integer stock){
+    @Transactional
+    public String checkStockAvailableAndCaching(Long user_id, Long product_id, Integer amount){
         Product product = this.findById(product_id);
-        return product.getStock() >= stock;
+        if(product.getStock() < amount) return null;
+
+        String redisKey = "order-%s_%s".formatted(user_id,product_id);
+        String redisKeyForValue = "orderValue-%s_%s".formatted(user_id,product_id);
+
+        // 중복된 레디스 키값이 들어오면 갱신되기 때문에 되돌리기 작업 필요
+        if(redisRepository.isKeyExists(redisKey)){
+            Integer stock = (Integer) redisRepository.get(redisKey);
+            product.setStock(product.getStock()+stock);
+        }
+
+        product.setStock(product.getStock()-amount);
+
+        redisRepository.save(redisKey,amount,3, TimeUnit.MINUTES);
+        redisRepository.save(redisKeyForValue,amount,4, TimeUnit.MINUTES);
+        return redisKey;
+    }
+
+    public void deleteCacheAfterPayment(String redisKey){
+        redisRepository.delete(redisKey);
     }
 
     @Transactional
-    public void updateStockAfterPayment(Long product_id, Integer stock){
-        Product product = this.findById(product_id);
-        product.setStock(product.getStock()-stock);
+    public void restoreStock(Long productId, Integer amount) {
+        Product product = this.findById(productId);
+        product.setStock(product.getStock()+amount);
     }
-
-    // TODO : 캐싱을 활용해 주문이 가능할경우 미리 재고량을 빼두고,
-    //  결제 성공시 캐시데이터 삭제, 실패시 재고량 원상복구 할 예정
 }
