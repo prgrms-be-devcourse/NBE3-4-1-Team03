@@ -70,17 +70,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/*/signup").permitAll()
-                        .requestMatchers("/api/v1/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/*/products/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/*/products/*").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, "/api/*/products/*").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/*/products").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/*/products/*").permitAll())
+                        .requestMatchers(HttpMethod.GET, "/h2-console/**", "/api/*/signup", "/api/*/products", "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products","/api/*/products/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products","/api/*/products/*").hasRole("ADMIN")
+                        .anyRequest().authenticated())
                 .addFilterAt(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthorizationFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
@@ -97,7 +92,7 @@ public class SecurityConfig {
                         }))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/logout")
-                        .addLogoutHandler(new JwtLogoutHandler(jwtUtil,redisRepository))
+                        .addLogoutHandler(new JwtLogoutHandler(jwtUtil, redisRepository))
                         .logoutSuccessHandler(new JwtLogoutSuccessHandler(objectMapper)));
 
         return http.build();
