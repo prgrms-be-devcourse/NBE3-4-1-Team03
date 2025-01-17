@@ -21,6 +21,7 @@ import com.app.backend.domain.user.controller.ApiV1UserController;
 import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.entity.UserStatus;
 import com.app.backend.domain.user.repository.UserRepository;
+import com.app.backend.global.annotation.CustomWithMockAdmin;
 import com.app.backend.global.util.ReflectionUtil;
 import com.app.backend.standard.util.Ut;
 import java.math.BigDecimal;
@@ -354,6 +355,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보")
     void profileTest1() throws Exception {
         // 회원가입
@@ -397,6 +399,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보 - 존재하지 않는 회원")
     void profileTest2() throws Exception {
         ResultActions resultActions = mockMvc
@@ -416,6 +419,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보 조회 - 탈퇴한 회원")
     void profileTest3() throws Exception {
         // 회원가입
@@ -458,6 +462,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보 수정")
     void modifyUserTest1() throws Exception {
         // 회원가입
@@ -513,6 +518,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보 수정 - 존재하지 않는 회원")
     void modifyUserTest2() throws Exception {
         ResultActions resultActions = mockMvc
@@ -540,6 +546,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보 수정 - 잘못된 전화번호 형식")
     void modifyUserTest3() throws Exception {
         // 회원가입
@@ -584,6 +591,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원정보 수정 - 탈퇴한 회원")
     void modifyUserTest4() throws Exception {
         // 회원가입
@@ -635,6 +643,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("비밀번호 찾기")
     void changePasswordTest1() throws Exception {
         // 회원가입
@@ -678,6 +687,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 이메일 불일치")
     void changePasswordTest2() throws Exception {
         // 회원가입
@@ -721,6 +731,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 새 비밀번호 형식 불일치")
     void changePasswordTest3() throws Exception {
         // 회원가입
@@ -764,6 +775,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 현재 비밀번호와 동일")
     void changePasswordTest4() throws Exception {
         // 회원가입
@@ -807,6 +819,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 성공")
     void changePasswordTest5() throws Exception {
         // 회원가입
@@ -850,6 +863,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원 탈퇴")
     void deleteUserTest1() throws Exception {
         // 회원가입
@@ -891,6 +905,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원 탈퇴 - 이미 탈퇴한 회원")
     void deleteUserTest2() throws Exception {
         // 회원가입
@@ -934,6 +949,7 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("회원 주문 목록 조회")
     void getOrdersByUser() throws Exception {
         //TODO: 시큐리티 인증 정보를 활용하는 코드가 베이스이기 때문에 시큐리티 적용 시 테스트가 통과하지 못할 것입니다.
