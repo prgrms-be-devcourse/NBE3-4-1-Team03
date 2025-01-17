@@ -147,6 +147,32 @@ public class ApiV1ProductController {
                 "상품 '%s'이(가) 삭제되었습니다.".formatted(product.getName())
         );
     }
-    
+
+    @PostMapping("/redis")
+    public RsData<Void> redis(
+            @Valid @RequestParam Long user_id,
+            @Valid @RequestParam Long product_id,
+            @Valid @RequestParam Integer amount
+    ) {
+        productService.checkStockAvailableAndCaching(user_id,product_id,amount);
+
+        return new RsData<>(
+                true,
+                "200",
+                "잘됨."
+        );
+    }
+
+    @PostMapping("/redis delete")
+    public RsData<Void> redisd(
+            @Valid @RequestParam String redisKey
+    ) {
+        productService.deleteCacheAfterPayment(redisKey);
+        return new RsData<>(
+                true,
+                "200",
+                "잘됨."
+        );
+    }
 
 }

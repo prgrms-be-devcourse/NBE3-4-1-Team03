@@ -114,13 +114,19 @@ public class ProductService {
         Product product = this.findById(product_id);
         if(product.getStock() < amount) return null;
 
-        // TODO : 중복된 Key를 만드는 요청이 들어온다면?
-        product.setStock(product.getStock()-amount);
-
         String redisKey = "order-%s_%s".formatted(user_id,product_id);
         String redisKeyForValue = "orderValue-%s_%s".formatted(user_id,product_id);
-        redisRepository.save(redisKey,amount,4, TimeUnit.MINUTES);
-        redisRepository.save(redisKeyForValue,amount,5, TimeUnit.MINUTES);
+
+        // 중복된 레디스 키값이 들어오면 갱신되기 때문에 되돌리기 작업 필요
+        if(redisRepository.isKeyExists(redisKey)){
+            Integer stock = (Integer) redisRepository.get(redisKey);
+            product.setStock(product.getStock()+stock);
+        }
+
+        product.setStock(product.getStock()-amount);
+
+        redisRepository.save(redisKey,amount,3, TimeUnit.MINUTES);
+        redisRepository.save(redisKeyForValue,amount,4, TimeUnit.MINUTES);
         return redisKey;
     }
 
