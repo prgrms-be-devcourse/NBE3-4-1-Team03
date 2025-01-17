@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+
     private final RedisRepository redisRepository;
 
     private static final String CREATED_DATE = "created_date";
