@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -104,4 +105,18 @@ public class ProductService {
     public void delete(Product product) {
         this.productRepository.delete(product);
     }
+
+    public boolean checkStockAvailable(Long product_id, Integer stock){
+        Product product = this.findById(product_id);
+        return product.getStock() >= stock;
+    }
+
+    @Transactional
+    public void updateStockAfterPayment(Long product_id, Integer stock){
+        Product product = this.findById(product_id);
+        product.setStock(product.getStock()-stock);
+    }
+
+    // TODO : 캐싱을 활용해 주문이 가능할경우 미리 재고량을 빼두고,
+    //  결제 성공시 캐시데이터 삭제, 실패시 재고량 원상복구 할 예정
 }
