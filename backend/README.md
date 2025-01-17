@@ -8,7 +8,7 @@
 
 #### 내용 예시:
 ```env
-JWT_SECRET=your_cret
+JWT_SECRET=your_jwt-secret
 ```
 
 ### 2. Redis 설정
