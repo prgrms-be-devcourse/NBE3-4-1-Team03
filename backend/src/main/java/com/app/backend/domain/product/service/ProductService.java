@@ -130,11 +130,11 @@ public class ProductService {
         return redisKey;
     }
 
-    @Transactional
     public void deleteCacheAfterPayment(String redisKey){
         redisRepository.delete(redisKey);
     }
 
+    @Transactional
     public void restoreStock(Long productId, Integer amount) {
         Product product = this.findById(productId);
         product.setStock(product.getStock()+amount);
