@@ -47,13 +47,11 @@ import org.springframework.test.web.servlet.ResultActions;
 class AdminControllerTest {
 
     @MockitoBean
-    private OrderService    orderService;
+    private OrderService orderService;
     @Autowired
-    private AdminController adminController;
+    private MockMvc      mockMvc;
     @Autowired
-    private MockMvc         mockMvc;
-    @Autowired
-    private ObjectMapper    objectMapper;
+    private ObjectMapper objectMapper;
 
     private OrderResponse orderResponse;
 
@@ -110,7 +108,7 @@ class AdminControllerTest {
         ResultActions resultActions = mockMvc.perform(get("/api/v1/admin/orders")
                                                               .accept(MediaType.APPLICATION_JSON_VALUE)
                                                               .contentType(MediaType.APPLICATION_JSON_VALUE)
-                                                              .with(user("admin").roles("USER")));
+                                                              .with(user("user").roles("USER")));
 
         //Then
         resultActions.andExpect(status().isForbidden())
