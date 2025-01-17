@@ -57,9 +57,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        // Todo : 리프레시 저장 key 값 정하기
         if (!redisRepository.get(username).equals(refreshToken)) {
-            // Todo : refreshToken 이 불일치 에러
             AuthResponseUtil.failLogin(
                     response,
                     new RsData<>(false, "400", "잘못된 refreshToken"),
@@ -82,7 +80,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 newAccessToken,
                 jwtUtil.setJwtCookie("refreshToken", newRefreshToken, REFRESH_EXPIRATION),
                 HttpServletResponse.SC_OK,
-                new RsData<>(true, "200", "AccessToken 재발급 성공", userDetails.getUsername()),
+                new RsData<>(true, "200", "AccessToken 재발급 성공"),
                 objectMapper);
     }
 
@@ -102,7 +100,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             // Todo : accessToken 이 만료되면 오류 반환 (임시 코드 설정)
             AuthResponseUtil.failLogin(
                     response,
-                    new RsData<>(false, "401", "accessToken 의 유효기간이 만료되었습니다"),
+                    new RsData<>(false, "999", "accessToken 의 유효기간이 만료되었습니다"),
                     HttpServletResponse.SC_UNAUTHORIZED,
                     objectMapper);
             return;
@@ -110,8 +108,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             // Todo : 이외 오류 반환 (임시 코드 설정)
             AuthResponseUtil.failLogin(
                     response,
-                    new RsData<>(false, "400", "accessToken 의 내용을 확인할 수 없습니다"),
-                    HttpServletResponse.SC_BAD_REQUEST,
+                    new RsData<>(false, "999", "accessToken 의 내용을 확인할 수 없습니다"),
+                    HttpServletResponse.SC_UNAUTHORIZED,
                     objectMapper);
             return;
         }

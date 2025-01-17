@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         AuthResponseUtil.failLogin(
                 response,
                 new RsData<>(false, "400", "로그인 정보가 정확하지 않습니다"),
-                HttpServletResponse.SC_UNAUTHORIZED,
+                HttpServletResponse.SC_BAD_REQUEST,
                 objectMapper);
     }
 

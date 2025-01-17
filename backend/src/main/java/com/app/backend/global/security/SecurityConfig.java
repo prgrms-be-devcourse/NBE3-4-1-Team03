@@ -72,13 +72,13 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) ->
                         {
                             AuthResponseUtil.failLogin(
-                                    response, new RsData<>(false, "400", "로그인을 진행해주세요"), HttpServletResponse.SC_UNAUTHORIZED, objectMapper);
+                                    response, new RsData<>(false, "400", "로그인을 진행해주세요"), HttpServletResponse.SC_BAD_REQUEST, objectMapper);
                         }))
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler((request, response, authException) ->
                         {
                             AuthResponseUtil.failLogin(
-                                    response, new RsData<>(false, "400", "권한이 없습니다"), HttpServletResponse.SC_UNAUTHORIZED, objectMapper);
+                                    response, new RsData<>(false, "403", "권한이 없습니다"), HttpServletResponse.SC_FORBIDDEN, objectMapper);
                         }));
 
         return http.build();
