@@ -133,7 +133,7 @@ class AdminControllerTest {
                                                               .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         //Then
-        resultActions.andExpect(status().isForbidden())
+        resultActions.andExpect(status().isBadRequest())
                      .andDo(print());
     }
 
