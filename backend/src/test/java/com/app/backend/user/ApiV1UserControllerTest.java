@@ -1,5 +1,11 @@
 package com.app.backend.user;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -8,11 +14,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.app.backend.domain.order.dto.response.OrderResponse;
+import com.app.backend.domain.order.entity.Order;
+import com.app.backend.domain.order.service.OrderService;
 import com.app.backend.domain.user.controller.ApiV1UserController;
 import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.entity.UserStatus;
 import com.app.backend.domain.user.repository.UserRepository;
+import com.app.backend.global.util.ReflectionUtil;
+import com.app.backend.standard.util.Ut;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +35,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -46,6 +54,9 @@ public class ApiV1UserControllerTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    //TODO: 임시 확인용 추가
+    @MockitoBean
+    private OrderService    orderService;
 
     @Test
     @DisplayName("회원가입")
@@ -54,15 +65,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1234!",
-                                            "name": "test1",
-                                            "address": "address",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1234!",
+                                             "name": "test1",
+                                             "address": "address",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -85,15 +96,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@.com",
-                                            "password": "test1234!",
-                                            "name": "test1",
-                                            "address": "address",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@.com",
+                                             "password": "test1234!",
+                                             "name": "test1",
+                                             "address": "address",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -116,15 +127,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1234",
-                                            "name": "test1",
-                                            "address": "address",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1234",
+                                             "name": "test1",
+                                             "address": "address",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -147,15 +158,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1!",
-                                            "name": "test1",
-                                            "address": "address",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1!",
+                                             "name": "test1",
+                                             "address": "address",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -178,15 +189,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1234!",
-                                            "name": "t",
-                                            "address": "address",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1234!",
+                                             "name": "t",
+                                             "address": "address",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -209,15 +220,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1234!",
-                                            "name": "test1",
-                                            "address": "address",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "010-1234-5678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1234!",
+                                             "name": "test1",
+                                             "address": "address",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "010-1234-5678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -240,14 +251,14 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1234!",
-                                            "name": "test1",
-                                            "detailAddress": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1234!",
+                                             "name": "test1",
+                                             "detailAddress": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -270,14 +281,14 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test1234!",
-                                            "name": "test1",
-                                            "address": "detailAddress",
-                                            "phone": "01012345678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test1234!",
+                                             "name": "test1",
+                                             "address": "detailAddress",
+                                             "phone": "01012345678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -300,15 +311,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(
                                 new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                         )
@@ -318,15 +329,15 @@ public class ApiV1UserControllerTest {
                 .perform(
                         post("/api/v1/signup")
                                 .content("""
-                                        {
-                                            "email": "test@test.com",
-                                            "password": "test5678!",
-                                            "name": "test2",
-                                            "address": "address2",
-                                            "detailAddress": "detailAddress2",
-                                            "phone": "01087654321"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test@test.com",
+                                             "password": "test5678!",
+                                             "name": "test2",
+                                             "address": "address2",
+                                             "detailAddress": "detailAddress2",
+                                             "phone": "01087654321"
+                                         }
+                                         """.stripIndent())
                                 .contentType(
                                         new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
                                 )
@@ -349,15 +360,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -366,23 +377,23 @@ public class ApiV1UserControllerTest {
 
         // 회원정보 조회
         mockMvc.perform(
-                get("/api/v1/users/" + user.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-        )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 불러왔습니다."))
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.data.name").value("test1"))
-                .andExpect(jsonPath("$.data.email").value("test123@test.com"))
-                .andExpect(jsonPath("$.data.status").value("ACTIVATED"))
-                .andExpect(jsonPath("$.data.role").value("ROLE_USER"))
-                .andExpect(jsonPath("$.data.phone").value("01012345678"))
-                .andExpect(jsonPath("$.data.address").value("address"))
-                .andExpect(jsonPath("$.data.detailAddress").value("detailAddress"))
-                .andExpect(jsonPath("$.data.created_date").exists())
-                .andExpect(jsonPath("$.data.modified_date").exists());
+                       get("/api/v1/users/" + user.getId())
+                               .contentType(MediaType.APPLICATION_JSON)
+               )
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.isSuccess").value(true))
+               .andExpect(jsonPath("$.message").value("회원 정보를 성공적으로 불러왔습니다."))
+               .andExpect(jsonPath("$.code").value("200"))
+               .andExpect(jsonPath("$.data.name").value("test1"))
+               .andExpect(jsonPath("$.data.email").value("test123@test.com"))
+               .andExpect(jsonPath("$.data.status").value("ACTIVATED"))
+               .andExpect(jsonPath("$.data.role").value("ROLE_USER"))
+               .andExpect(jsonPath("$.data.phone").value("01012345678"))
+               .andExpect(jsonPath("$.data.address").value("address"))
+               .andExpect(jsonPath("$.data.detailAddress").value("detailAddress"))
+               .andExpect(jsonPath("$.data.created_date").exists())
+               .andExpect(jsonPath("$.data.modified_date").exists());
     }
 
     @Test
@@ -411,15 +422,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -453,15 +464,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         );
 
@@ -470,13 +481,13 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/1")
                                 .content("""
-                                        {
-                                            "name": "modified",
-                                            "address": "modified address",
-                                            "detailAddress": "modified detailAddress",
-                                            "phone": "01087654321"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "name": "modified",
+                                             "address": "modified address",
+                                             "detailAddress": "modified detailAddress",
+                                             "phone": "01087654321"
+                                         }
+                                         """.stripIndent())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print());
@@ -491,14 +502,14 @@ public class ApiV1UserControllerTest {
 
         // 수정된 정보 확인
         mockMvc.perform(
-                        get("/api/v1/users/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.name").value("modified"))
-                .andExpect(jsonPath("$.data.address").value("modified address"))
-                .andExpect(jsonPath("$.data.detailAddress").value("modified detailAddress"))
-                .andExpect(jsonPath("$.data.phone").value("01087654321"));
+                       get("/api/v1/users/1")
+                               .contentType(MediaType.APPLICATION_JSON)
+               )
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.data.name").value("modified"))
+               .andExpect(jsonPath("$.data.address").value("modified address"))
+               .andExpect(jsonPath("$.data.detailAddress").value("modified detailAddress"))
+               .andExpect(jsonPath("$.data.phone").value("01087654321"));
     }
 
     @Test
@@ -508,13 +519,13 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/3")
                                 .content("""
-                                        {
-                                            "name": "modified",
-                                            "address": "modified address",
-                                            "detailAddress": "modified detailAddress",
-                                            "phone": "01087654321"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "name": "modified",
+                                             "address": "modified address",
+                                             "detailAddress": "modified detailAddress",
+                                             "phone": "01087654321"
+                                         }
+                                         """.stripIndent())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print());
@@ -535,15 +546,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "modified detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "modified detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         );
 
@@ -552,13 +563,13 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/1")
                                 .content("""
-                                        {
-                                            "name": "modified",
-                                            "address": "modified address",
-                                            "detailAddress": "modified detailAddress",
-                                            "phone": "010-1234-5678"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "name": "modified",
+                                             "address": "modified address",
+                                             "detailAddress": "modified detailAddress",
+                                             "phone": "010-1234-5678"
+                                         }
+                                         """.stripIndent())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print());
@@ -579,15 +590,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -604,13 +615,13 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/" + user.getId())
                                 .content("""
-                                        {
-                                            "name": "modified",
-                                            "address": "modified address",
-                                            "detailAddress": "modified detailAddress",
-                                            "phone": "01087654321"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "name": "modified",
+                                             "address": "modified address",
+                                             "detailAddress": "modified detailAddress",
+                                             "phone": "01087654321"
+                                         }
+                                         """.stripIndent())
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
 
@@ -630,15 +641,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -650,11 +661,11 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
                                 .content("""
-                                        {
-                                            "email": "test123@test.com",
-                                            "newPassword": "modifyPassword1234!"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test123@test.com",
+                                             "newPassword": "modifyPassword1234!"
+                                         }
+                                         """.stripIndent())
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
         resultActions
@@ -673,15 +684,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -692,11 +703,11 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
                                 .content("""
-                                        {
-                                            "email": "wrong@test.com",
-                                            "newPassword": "modifyPassword1234!"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "wrong@test.com",
+                                             "newPassword": "modifyPassword1234!"
+                                         }
+                                         """.stripIndent())
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
 
@@ -716,15 +727,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -735,11 +746,11 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
                                 .content("""
-                                        {
-                                            "email": "test123@test.com",
-                                            "newPassword": "short"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test123@test.com",
+                                             "newPassword": "short"
+                                         }
+                                         """.stripIndent())
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
 
@@ -759,15 +770,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -778,11 +789,11 @@ public class ApiV1UserControllerTest {
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
                                 .content("""
-                                        {
-                                            "email": "test123@test.com",
-                                            "newPassword": "test1234!"
-                                        }
-                                        """.stripIndent())
+                                         {
+                                             "email": "test123@test.com",
+                                             "newPassword": "test1234!"
+                                         }
+                                         """.stripIndent())
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
 
@@ -802,30 +813,30 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
-        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+        User   user        = userRepository.findByEmail("test123@test.com").orElseThrow();
         String newPassword = "modifyPassword1234!";
 
         // 비밀번호 변경
         mockMvc.perform(
                 patch("/api/v1/users/" + user.getId() + "/password")
                         .content("""
-                                {
-                                    "email": "test123@test.com",
-                                    "newPassword": "%s"
-                                }
-                                """.formatted(newPassword))
+                                 {
+                                     "email": "test123@test.com",
+                                     "newPassword": "%s"
+                                 }
+                                 """.formatted(newPassword))
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isOk());
 
@@ -845,15 +856,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -886,15 +897,15 @@ public class ApiV1UserControllerTest {
         mockMvc.perform(
                 post("/api/v1/signup")
                         .content("""
-                                {
-                                    "email": "test@test.com",
-                                    "password": "test1234!",
-                                    "name": "test1",
-                                    "address": "address",
-                                    "detailAddress": "detailAddress",
-                                    "phone": "01012345678"
-                                }
-                                """.stripIndent())
+                                 {
+                                     "email": "test@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
@@ -920,6 +931,55 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(false))
                 .andExpect(jsonPath("$.code").value("U005"))
                 .andExpect(jsonPath("$.message").value("탈퇴한 회원"));
+    }
+
+    @Test
+    @DisplayName("회원 주문 목록 조회")
+    void getOrdersByUser() throws Exception {
+        //TODO: 시큐리티 인증 정보를 활용하는 코드가 베이스이기 때문에 시큐리티 적용 시 테스트가 통과하지 못할 것입니다.
+        //Given
+        User customer = User.builder()
+                            .email("user@mail.com")
+                            .password("user")
+                            .name("user")
+                            .address("user address")
+                            .detailAddress("user detail address")
+                            .phone("01000000000")
+                            .status("ACTIVATE")
+                            .role("ROLE_USER")
+                            .build();
+
+        Order order = Order.of(customer, "orderNumber", 1, BigDecimal.valueOf(10000.00),
+                               "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
+        ReflectionUtil.setPrivateFieldValue(Order.class, order, "createdDate", LocalDateTime.now());
+
+        OrderResponse orderResponse = OrderResponse.of(order);
+
+        when(orderService.getOrdersByUserId(anyLong())).thenReturn(List.of(orderResponse));
+
+        //When
+        ResultActions resultActions = mockMvc.perform(get("/api/v1/users/orders")
+                                                              .contentType(new MediaType(MediaType.APPLICATION_JSON,
+                                                                                         StandardCharsets.UTF_8)))
+                                             .andDo(print());
+
+        //Then
+        resultActions.andExpect(handler().handlerType(ApiV1UserController.class))
+                     .andExpect(handler().methodName("getOrdersByUser"))
+                     .andExpect(status().isOk())
+                     .andExpect(jsonPath("$.isSuccess").value(true))
+                     .andExpect(jsonPath("$.code").value("200"))
+                     .andExpect(jsonPath("$.message").value("회원의 주문 정보를 성공적으로 조회했습니다."))
+                     .andExpect(jsonPath("$.data").exists())
+                     .andExpect(jsonPath("$.data[0].orderNumber").value(order.getOrderNumber()))
+                     .andExpect(jsonPath("$.data[0].name").value(customer.getName()))
+                     .andExpect(jsonPath("$.data[0].totalAmount").value(order.getTotalAmount()))
+                     .andExpect(jsonPath("$.data[0].totalPrice").value(order.getTotalPrice()))
+                     .andExpect(jsonPath("$.data[0].orderAddress").value(order.getAddress()))
+                     .andExpect(jsonPath("$.data[0].orderStatus").value(order.getStatus().name()))
+                     .andExpect(jsonPath("$.data[0].orderList").isEmpty())
+                     .andExpect(jsonPath("$.data[0].createdDate")
+                                        .value(Ut.Str.localDateTimeToString(order.getCreatedDate())));
     }
 
 }
