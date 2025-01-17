@@ -33,55 +33,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String requestURI = request.getRequestURI();
 
-        if (requestURI.equals("/api/v1/reissue")) {
-            reissueFilter(request, response);
-        } else {
-            accessFilter(request, response, filterChain);
-        }
-    }
+        accessFilter(request, response, filterChain);
 
-    private void reissueFilter(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String refreshToken = getRefreshToken(request);
-
-        if (refreshToken == null) {
-            AuthResponseUtil.failLogin(
-                    response,
-                    new RsData<>(false, "400", "refreshToken 이 존재하지 않습니다"),
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    objectMapper);
-            return;
-        }
-
-        String username = jwtUtil.getUsername(refreshToken);
-        String role = jwtUtil.getRole(refreshToken);
-
-        if (!redisRepository.get(username).equals(refreshToken)) {
-            AuthResponseUtil.failLogin(
-                    response,
-                    new RsData<>(false, "400", "잘못된 refreshToken"),
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    objectMapper
-            );
-            return;
-        }
-
-        CustomUserDetails userDetails = new CustomUserDetails(User.builder().email(username).role(role).build());
-
-        String newAccessToken = jwtUtil.createAccessToken(userDetails, ACCESS_EXPIRATION);
-        String newRefreshToken = jwtUtil.createRefreshToken(userDetails, REFRESH_EXPIRATION);
-
-        redisRepository.delete(userDetails.getUsername());
-        redisRepository.save(userDetails.getUsername(), newRefreshToken, REFRESH_EXPIRATION, TimeUnit.MILLISECONDS);
-
-        AuthResponseUtil.success(
-                response,
-                newAccessToken,
-                jwtUtil.setJwtCookie("refreshToken", newRefreshToken, REFRESH_EXPIRATION),
-                HttpServletResponse.SC_OK,
-                new RsData<>(true, "200", "AccessToken 재발급 성공"),
-                objectMapper);
     }
 
     private void accessFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -97,19 +51,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         try {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
-            // Todo : accessToken 이 만료되면 오류 반환 (임시 코드 설정)
-            AuthResponseUtil.failLogin(
-                    response,
-                    new RsData<>(false, "999", "accessToken 의 유효기간이 만료되었습니다"),
-                    HttpServletResponse.SC_UNAUTHORIZED,
-                    objectMapper);
+            System.out.println(" 기간 만료 ");
+            reissueFilter(request, response, filterChain);
             return;
         } catch (JwtException e) {
             // Todo : 이외 오류 반환 (임시 코드 설정)
             AuthResponseUtil.failLogin(
                     response,
-                    new RsData<>(false, "999", "accessToken 의 내용을 확인할 수 없습니다"),
-                    HttpServletResponse.SC_UNAUTHORIZED,
+                    new RsData<>(false, "400", "accessToken 의 내용을 확인할 수 없습니다"),
+                    HttpServletResponse.SC_BAD_REQUEST,
                     objectMapper);
             return;
         }
@@ -122,6 +72,51 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void reissueFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String refreshToken = getRefreshToken(request);
+
+        System.out.println(" 리프레시 검증하러 들어옴 ");
+
+        if (refreshToken == null) {
+            AuthResponseUtil.failLogin(
+                    response,
+                    new RsData<>(false, "401", "refreshToken 이 존재하지 않습니다"),
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    objectMapper);
+            return;
+        }
+
+        String username = jwtUtil.getUsername(refreshToken);
+        String role = jwtUtil.getRole(refreshToken);
+
+        if (!redisRepository.get(username).equals(refreshToken)) {
+            AuthResponseUtil.failLogin(
+                    response,
+                    new RsData<>(false, "401", "잘못된 refreshToken"),
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    objectMapper
+            );
+            return;
+        }
+
+        CustomUserDetails userDetails = new CustomUserDetails(User.builder().email(username).role(role).build());
+
+        String newAccessToken = jwtUtil.createAccessToken(userDetails, ACCESS_EXPIRATION);
+        String newRefreshToken = jwtUtil.createRefreshToken(userDetails, REFRESH_EXPIRATION);
+
+        redisRepository.delete(userDetails.getUsername());
+        redisRepository.save(userDetails.getUsername(), newRefreshToken, REFRESH_EXPIRATION, TimeUnit.MILLISECONDS);
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        response.setHeader("Authorization", newAccessToken);
+        response.addCookie(jwtUtil.setJwtCookie("refreshToken", newRefreshToken, REFRESH_EXPIRATION));
 
         filterChain.doFilter(request, response);
     }
