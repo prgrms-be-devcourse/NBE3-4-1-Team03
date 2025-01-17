@@ -4,6 +4,7 @@ import com.app.backend.domain.product.controller.ApiV1ProductController;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.domain.product.service.ProductService;
+import com.app.backend.global.annotation.CustomWithMockAdmin;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -393,6 +394,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 등록")
     void addProductTest() throws Exception {
         ResultActions resultActions = mockMvc
@@ -432,6 +434,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 삭제")
     void deleteProductTest() throws Exception {
         ResultActions resultActions = mockMvc
@@ -450,6 +453,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 전체 수정")
     void modifyProductTest1() throws Exception {
         ResultActions resultActions = mockMvc
@@ -489,6 +493,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 이름 수정")
     void modifyProductTest2() throws Exception {
         ResultActions resultActions = mockMvc
@@ -524,6 +529,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 설명 수정")
     void modifyProductTest3() throws Exception {
         ResultActions resultActions = mockMvc
@@ -559,6 +565,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 가격 수정")
     void modifyProductTest4() throws Exception {
         ResultActions resultActions = mockMvc
@@ -594,6 +601,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 수량 수정")
     void modifyProductTest5() throws Exception {
         ResultActions resultActions = mockMvc
@@ -629,6 +637,7 @@ public class ApiV1ProductControllerTest {
     }
 
     @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 상태 수정")
     void modifyProductTest6() throws Exception {
         ResultActions resultActions = mockMvc
