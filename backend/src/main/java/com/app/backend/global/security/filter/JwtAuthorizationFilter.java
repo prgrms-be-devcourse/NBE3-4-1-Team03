@@ -66,8 +66,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String username = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
+        Long id = jwtUtil.getUserId(accessToken);
 
-        CustomUserDetails userDetails = new CustomUserDetails(User.builder().email(username).role(role).build());
+        CustomUserDetails userDetails = new CustomUserDetails(User.builder().id(id).email(username).role(role).build());
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

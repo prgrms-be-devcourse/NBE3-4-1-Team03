@@ -1,6 +1,7 @@
 package com.app.backend.global.security.util;
 
 import com.app.backend.global.security.user.CustomUserDetails;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,10 @@ public class JwtUtil {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS512.key().build().getAlgorithm());
     }
 
+    public Long getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("id", Long.class);
+    }
+
     public String getUsername(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
     }
@@ -37,6 +42,7 @@ public class JwtUtil {
 
         return "Bearer " + Jwts.builder()
                 .claim("subject", "access")
+                .claim("id", customUserDetails.getUser().getId())
                 .claim("username", customUserDetails.getUsername())
                 .claim("role", customUserDetails.getUser().getRole())
                 .issuedAt(new Date(currentTime))
@@ -50,6 +56,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .claim("subject", "refresh")
+                .claim("id", customUserDetails.getUser().getId())
                 .claim("username", customUserDetails.getUsername())
                 .claim("role", customUserDetails.getUser().getRole())
                 .issuedAt(new Date(currentTime))
