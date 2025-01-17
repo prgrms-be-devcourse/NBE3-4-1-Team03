@@ -74,6 +74,58 @@ class OrderRepositoryTest {
     }
 
     @ParameterizedTest
+    @CsvSource({"1, 1", "2, 2", "3, 3", "4, 4", "5, 5", "6, 1", "7, 2", "8, 3", "9, 4", "10, 5"})
+    @DisplayName("findByIdAndCustomer_Id")
+    void findByIdAndCustomer_Id(final long orderId, final long customerId) {
+        //Given
+
+        //When
+        Optional<Order> opOrder = orderRepository.findByIdAndCustomer_Id(orderId, customerId);
+
+        //Then
+        assertThat(opOrder).isNotEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1234567890, 1", "1234567890, 2", "1234567890, 3", "1234567890, 4", "1234567890, 5"})
+    @DisplayName("findByIdAndCustomer_Id, unknown order id")
+    void findByIdAndCustomer_Id_unknownOrderId(final long orderId, final long customerId) {
+        //Given
+
+        //When
+        Optional<Order> opOrder = orderRepository.findByIdAndCustomer_Id(orderId, customerId);
+
+        //Then
+        assertThat(opOrder).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1, 1234567890", "2, 1234567890", "3, 1234567890", "4, 1234567890", "5, 1234567890"})
+    @DisplayName("findByIdAndCustomer_Id, unknown customer id")
+    void findByIdAndCustomer_Id_unknownCustomerId(final long orderId, final long customerId) {
+        //Given
+
+        //When
+        Optional<Order> opOrder = orderRepository.findByIdAndCustomer_Id(orderId, customerId);
+
+        //Then
+        assertThat(opOrder).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1234567890, 1234567890", "987654321, 987654321"})
+    @DisplayName("findByIdAndCustomer_Id, unknown order id and customer id")
+    void findByIdAndCustomer_Id_unknownOrderIdAndCustomerId(final long orderId, final long customerId) {
+        //Given
+
+        //When
+        Optional<Order> opOrder = orderRepository.findByIdAndCustomer_Id(orderId, customerId);
+
+        //Then
+        assertThat(opOrder).isEmpty();
+    }
+
+    @ParameterizedTest
     @CsvSource({"1", "2", "3", "4", "5"})
     @DisplayName("findByCustomer_Id")
     void findByCustomer_Id(final long userId) {

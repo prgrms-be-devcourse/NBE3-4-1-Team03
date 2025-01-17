@@ -223,6 +223,98 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("getOrderByIdAndUserId")
+    void getOrderByIdAndUserId() {
+        //Given
+        User               customer      = users.get(0);
+        Order              order         = createDummyOrder(customer, 1).get(0);
+        List<OrderProduct> orderProducts = createDummyOrderProducts(order);
+
+        Long orderId = order.getId();
+        Long userId  = customer.getId();
+        afterEach();
+
+        //When
+        OrderResponse orderResponse = orderService.getOrderByIdAndUserId(orderId, userId);
+
+        //Then
+        assertThat(orderResponse.getName()).isEqualTo(order.getCustomer().getName());
+        assertThat(orderResponse.getOrderNumber()).isEqualTo(order.getOrderNumber());
+        assertThat(orderResponse.getTotalAmount()).isEqualTo(order.getTotalAmount());
+        assertThat(orderResponse.getTotalPrice().compareTo(order.getTotalPrice()) == 0).isTrue();
+        assertThat(orderResponse.getOrderAddress()).isEqualTo(order.getAddress());
+        assertThat(orderResponse.getOrderStatus()).isEqualTo(order.getStatus().name());
+        for (OrderProduct orderProduct : orderProducts)
+            orderResponse.getOrderList().forEach(op -> {
+                if (op.getName().equals(orderProduct.getProduct().getName())) {
+                    assertThat(op.getPrice().compareTo(orderProduct.getProductPrice()) == 0).isTrue();
+                    assertThat(op.getAmount()).isEqualTo(orderProduct.getProductAmount());
+                    assertThat(op.getTotalPrice().compareTo(orderProduct.getTotalProductPrice()) == 0).isTrue();
+                }
+            });
+        assertThat(orderResponse.getCreatedDate()).isEqualTo(Ut.Str.localDateTimeToString(order.getCreatedDate()));
+    }
+
+    @Test
+    @DisplayName("getOrderByIdAndUserId, unknown order id")
+    void getOrderByIdAndUserId_unknownOrderId() {
+        //Given
+        long unknownOrderId = 1234567890L;
+        Long userId         = users.get(0).getId();
+        afterEach();
+
+        //When
+
+        //Then
+        final ErrorCode errorCode = ErrorCode.ORDER_NOT_FOUND;
+
+        assertThatThrownBy(() -> orderService.getOrderByIdAndUserId(unknownOrderId, userId))
+                .isInstanceOf(OrderException.class)
+                .hasFieldOrPropertyWithValue("errorCode", errorCode)
+                .hasMessage(errorCode.getMessage());
+    }
+
+    @Test
+    @DisplayName("getOrderByIdAndUserId, unknown user id")
+    void getOrderByIdAndUserId_unknownUserId() {
+        //Given
+        User  customer = users.get(0);
+        Order order    = createDummyOrder(customer, 1).get(0);
+
+        Long orderId       = order.getId();
+        Long unknownUserId = 1234567890L;
+        afterEach();
+
+        //When
+
+        //Then
+        final ErrorCode errorCode = ErrorCode.ORDER_BUYER_MISMATCH;
+
+        assertThatThrownBy(() -> orderService.getOrderByIdAndUserId(orderId, unknownUserId))
+                .isInstanceOf(OrderException.class)
+                .hasFieldOrPropertyWithValue("errorCode", errorCode)
+                .hasMessage(errorCode.getMessage());
+    }
+
+    @Test
+    @DisplayName("getOrderByIdAndUserId, unknown user id and order id")
+    void getOrderByIdAndUserId_unknownUserIdAndUnknownOrderId() {
+        //Given
+        long unknownOrderId = 1234567890L;
+        long unknownUserId  = 1234567890L;
+
+        //When
+
+        //Then
+        final ErrorCode errorCode = ErrorCode.ORDER_NOT_FOUND;
+
+        assertThatThrownBy(() -> orderService.getOrderByIdAndUserId(unknownOrderId, unknownUserId))
+                .isInstanceOf(OrderException.class)
+                .hasFieldOrPropertyWithValue("errorCode", errorCode)
+                .hasMessage(errorCode.getMessage());
+    }
+
+    @Test
     @DisplayName("getOrderByOrderNumber")
     void getOrderByOrderNumber() {
         //Given
