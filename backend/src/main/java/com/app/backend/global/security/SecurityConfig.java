@@ -67,7 +67,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/v1/signup").permitAll())
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/*/signup").permitAll()
+                        .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/*/products/*").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/*/products/*").permitAll())
                 .addFilterAt(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthorizationFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
@@ -89,6 +99,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     public CorsConfigurationSource corsConfigurationSource() {
 

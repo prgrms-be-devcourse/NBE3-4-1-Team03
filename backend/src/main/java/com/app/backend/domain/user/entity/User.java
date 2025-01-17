@@ -52,4 +52,19 @@ public class User extends BaseEntity {
     @Column(name = "user_role", nullable = false)
     private String role = "ROLE_USER";
 
+    public void modifyInfo(String name, String address, String detailAddress, String phone) {
+        if (name != null) this.name = name;
+        if (address != null) this.address = address;
+        if (detailAddress != null) this.detailAddress = detailAddress;
+        if (phone != null) this.phone = phone;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    public void deleteUser() {
+        this.status = UserStatus.DELETED.toString();
+    }
+
 }
