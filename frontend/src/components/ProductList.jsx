@@ -62,7 +62,22 @@ const ProductList = () => {
 
       <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 xl:gap-x-8">
         {product_info.map((product) => (
-          <div key={product.product_id} className="group">
+          <div
+            key={product.product_id}
+            className="group relative border border-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-1"
+          >
+            {/* 이미지 위에 텍스트 표시 */}
+            {product.product_status === false && (
+              <div className="absolute top-2 left-2 text-red-600 font-bold text-lg bg-white px-2 py-1 rounded-lg z-10">
+                판매 중지
+              </div>
+            )}
+            {product.product_amount === 0 && (
+              <div className="absolute top-2 left-2 text-red-600 font-bold text-lg bg-white px-2 py-1 rounded-lg z-10">
+                재고 없음
+              </div>
+            )}
+
             <img
               src="https://i.imgur.com/HKOFQYa.jpeg"
               alt={product.product_name}
@@ -95,12 +110,19 @@ const ProductList = () => {
               </button>
             </div>
 
-            {/* 카트에 담기 버튼 */}
+            {/* 장바구니 담기 버튼 */}
             <button
               onClick={() => handleAddToCart(product)}
-              className="mt-4 py-2 px-6 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              disabled={
+                product.product_status === false || product.product_amount === 0
+              }
+              className={`mt-4 py-2 px-6 rounded-md ${
+                product.product_status === false || product.product_amount === 0
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
             >
-              카트에 담기
+              장바구니 담기
             </button>
           </div>
         ))}
