@@ -22,6 +22,7 @@ import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.entity.UserStatus;
 import com.app.backend.domain.user.repository.UserRepository;
 import com.app.backend.global.annotation.CustomWithMockAdmin;
+import com.app.backend.global.security.user.CustomUserDetails;
 import com.app.backend.global.util.ReflectionUtil;
 import com.app.backend.standard.util.Ut;
 import java.math.BigDecimal;
@@ -34,12 +35,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -58,6 +63,24 @@ public class ApiV1UserControllerTest {
     //TODO: 임시 확인용 추가
     @MockitoBean
     private OrderService    orderService;
+
+    @BeforeEach
+    void setUp() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void setupAutentication(User user) {
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
     @Test
     @DisplayName("회원가입")
@@ -377,6 +400,8 @@ public class ApiV1UserControllerTest {
         // 방금 생성된 유저 찾기
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
+        setupAutentication(user);
+
         // 회원정보 조회
         mockMvc.perform(
                        get("/api/v1/users/" + user.getId())
@@ -481,10 +506,14 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         );
 
+        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        setupAutentication(user);
+
         // 회원정보 수정
         ResultActions resultActions = mockMvc
                 .perform(
-                        patch("/api/v1/users/1")
+                        patch("/api/v1/users/" + user.getId())
                                 .content("""
                                          {
                                              "name": "modified",
@@ -507,7 +536,7 @@ public class ApiV1UserControllerTest {
 
         // 수정된 정보 확인
         mockMvc.perform(
-                       get("/api/v1/users/1")
+                       get("/api/v1/users/" + user.getId())
                                .contentType(MediaType.APPLICATION_JSON)
                )
                .andExpect(status().isOk())
@@ -565,10 +594,14 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         );
 
+        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        setupAutentication(user);
+
         // 잘못된 형식으로 수정 시도
         ResultActions resultActions = mockMvc
                 .perform(
-                        patch("/api/v1/users/1")
+                        patch("/api/v1/users/" + user.getId())
                                 .content("""
                                          {
                                              "name": "modified",
@@ -611,6 +644,8 @@ public class ApiV1UserControllerTest {
         ).andExpect(status().isCreated());
 
         User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        setupAutentication(user);
 
         // 회원 탈퇴
         mockMvc.perform(
@@ -665,6 +700,8 @@ public class ApiV1UserControllerTest {
         // 방금 생성된 유저 찾기
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
+        setupAutentication(user);
+
         // 비밀번호 변경
         ResultActions resultActions = mockMvc
                 .perform(
@@ -707,6 +744,8 @@ public class ApiV1UserControllerTest {
         ).andExpect(status().isCreated());
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        setupAutentication(user);
 
         // 다른 이메일로 비밀번호 변경 시도
         ResultActions resultActions = mockMvc
@@ -752,6 +791,8 @@ public class ApiV1UserControllerTest {
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
+        setupAutentication(user);
+
         // 잘못된 형식의 비밀번호로 변경 시도
         ResultActions resultActions = mockMvc
                 .perform(
@@ -796,6 +837,8 @@ public class ApiV1UserControllerTest {
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
+        setupAutentication(user);
+
         // 현재 비밀번호와 동일한 비밀번호로 변경 시도
         ResultActions resultActions = mockMvc
                 .perform(
@@ -838,8 +881,10 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
-        User   user        = userRepository.findByEmail("test123@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
         String newPassword = "modifyPassword1234!";
+
+        setupAutentication(user);
 
         // 비밀번호 변경
         mockMvc.perform(
@@ -884,6 +929,8 @@ public class ApiV1UserControllerTest {
 
         User user = userRepository.findByEmail("test@test.com").orElseThrow();
 
+        setupAutentication(user);
+
         // 회원 탈퇴
         ResultActions resultActions = mockMvc
                 .perform(
@@ -925,6 +972,8 @@ public class ApiV1UserControllerTest {
         ).andExpect(status().isCreated());
 
         User user = userRepository.findByEmail("test@test.com").orElseThrow();
+
+        setupAutentication(user);
 
         // 첫 번째 회원 탈퇴
         mockMvc.perform(
