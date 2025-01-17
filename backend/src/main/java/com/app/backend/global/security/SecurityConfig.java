@@ -2,6 +2,8 @@ package com.app.backend.global.security;
 
 import com.app.backend.global.security.filter.JwtAuthenticationFilter;
 import com.app.backend.global.security.filter.JwtAuthorizationFilter;
+import com.app.backend.global.security.handler.JwtLogoutHandler;
+import com.app.backend.global.security.handler.JwtLogoutSuccessHandler;
 import com.app.backend.global.security.util.JwtUtil;
 import com.app.backend.global.security.util.AuthResponseUtil;
 import com.app.backend.global.redis.repository.RedisRepository;
@@ -79,7 +81,11 @@ public class SecurityConfig {
                         {
                             AuthResponseUtil.failLogin(
                                     response, new RsData<>(false, "403", "권한이 없습니다"), HttpServletResponse.SC_FORBIDDEN, objectMapper);
-                        }));
+                        }))
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/logout")
+                        .addLogoutHandler(new JwtLogoutHandler(jwtUtil,redisRepository))
+                        .logoutSuccessHandler(new JwtLogoutSuccessHandler(objectMapper)));
 
         return http.build();
     }
