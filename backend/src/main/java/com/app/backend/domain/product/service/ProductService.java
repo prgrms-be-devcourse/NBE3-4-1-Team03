@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +111,7 @@ public class ProductService {
         return product.getStock() >= stock;
     }
 
+    @Transactional
     public void updateStockAfterPayment(Long product_id, Integer stock){
         Product product = this.findById(product_id);
         product.setStock(product.getStock()-stock);
