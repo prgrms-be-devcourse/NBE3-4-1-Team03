@@ -104,6 +104,24 @@ public class OrderService {
     }
 
     /**
+     * 주문 ID, 회원 ID로 주문 정보 단건 조회
+     * 해당 주문에 대한 구매 회원이 아닐 경우 예외
+     *
+     * @param orderId - 주문 ID
+     * @param userId  - 회원 ID
+     * @return
+     */
+    public OrderResponse getOrderByIdAndUserId(final long orderId, final long userId) {
+        Order order = orderRepository.findById(orderId)
+                                     .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (order.getCustomer().getId().equals(userId))
+            return OrderResponse.of(order);
+
+        throw new OrderException(ErrorCode.ORDER_BUYER_MISMATCH);
+    }
+
+    /**
      * 주문 번호로 주문 정보 단건 조회
      *
      * @param orderNumber - 주문 번호
@@ -189,6 +207,29 @@ public class OrderService {
         validOrderStatus(orderStatus);
 
         order.updateOrderStatus(OrderStatus.valueOf(orderStatus));
+    }
+
+    /**
+     * 주문 상태 변경
+     *
+     * @param orderId     - 주문 ID
+     * @param userId      - 회원 ID
+     * @param orderStatus - 변경할 주문 상태 문자열: ORDERED, SHIPPED, DELIVERED, CANCELLED
+     */
+    @Transactional
+    public void updateOrderStatusByUserId(final long orderId, final long userId, final String orderStatus) {
+        Order order = orderRepository.findById(orderId)
+                                     .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (order.getCustomer().getId().equals(userId)) {
+            validOrderStatus(orderStatus);
+
+            order.updateOrderStatus(OrderStatus.valueOf(orderStatus));
+
+            return;
+        }
+
+        throw new OrderException(ErrorCode.ORDER_BUYER_MISMATCH);
     }
 
     /**
