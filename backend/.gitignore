@@ -204,4 +204,5 @@ gradle-app.setting
 ### IntelliJ IDEA Ignore Options ###
 .idea/**
 
+.env
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,java,gradle
