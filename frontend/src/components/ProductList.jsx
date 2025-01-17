@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useProductContext } from "../context/ProductContext";
+import ProductDetailModal from "./ProductDetailModal";
 import Error from "./Error";
 import Loading from "./Loading";
 
 const ProductList = () => {
   const { state, loading, error, setPage } = useProductContext();
-
-  const { product_info, currentPage, totalPages, hasNext, hasPrevious } = state; //페이지네이션 및 데이터 필요한거 뽑아쓰기.
+  const { product_info, currentPage, totalPages, hasNext, hasPrevious } = state; // 페이지네이션 및 데이터 필요한거 뽑아쓰기.
 
   const [quantities, setQuantities] = useState({});
-  const [selectedProduct, setSelectedProduct] = useState(null); // 모달을 열기 위한 상태
+  const [modalProductId, setModalProductId] = useState(null); // 모달 상태 관리
 
   const handleQuantityChange = (productId, change) => {
     setQuantities((prev) => ({
@@ -31,8 +31,8 @@ const ProductList = () => {
     };
 
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-
     const itemIndex = existingCart.findIndex((item) => item.id === product_id);
+
     if (itemIndex > -1) {
       existingCart[itemIndex].count += count;
       existingCart[itemIndex].totalprice =
@@ -42,16 +42,15 @@ const ProductList = () => {
     }
 
     alert("장바구니에 담겼습니다!");
-
     localStorage.setItem("cart", JSON.stringify(existingCart));
   };
 
-  const openModal = (product) => {
-    setSelectedProduct(product); // 클릭한 상품을 모달에 넘겨줌
+  const openModal = (productId) => {
+    setModalProductId(productId); // 모달 열림 상태와 ID 설정
   };
 
   const closeModal = () => {
-    setSelectedProduct(null); // 모달 닫기
+    setModalProductId(null); // 모달 닫기
   };
 
   if (loading) return <Loading />;
@@ -68,7 +67,7 @@ const ProductList = () => {
               src="https://i.imgur.com/HKOFQYa.jpeg"
               alt={product.product_name}
               className="aspect-square w-full rounded-lg bg-gray-200 object-cover group-hover:opacity-75 xl:aspect-[7/8]"
-              onClick={() => openModal(product)} // 상품 클릭 시 모달 열기
+              onClick={() => openModal(product.product_id)} // 상품 클릭 시 모달 열기
             />
             <h3 className="mt-4 text-sm text-gray-700">
               {product.product_name}
@@ -124,7 +123,6 @@ const ProductList = () => {
           {/* 페이지 번호 목록 */}
           {[...Array(totalPages)].map((_, index) => {
             const page = index + 1; // 페이지 번호는 1부터 시작
-            // 현재 페이지 기준으로 -5부터 +5까지만 보여줌
             if (page >= currentPage - 5 && page <= currentPage + 5) {
               return (
                 <li
@@ -141,7 +139,7 @@ const ProductList = () => {
                 </li>
               );
             }
-            return null; // 조건에 맞지 않으면 렌더링하지 않음
+            return null;
           })}
 
           {/* 다음 버튼 */}
@@ -157,6 +155,11 @@ const ProductList = () => {
           )}
         </ul>
       </nav>
+
+      {/* 모달 */}
+      {modalProductId && (
+        <ProductDetailModal productId={modalProductId} onClose={closeModal} />
+      )}
     </section>
   );
 };
