@@ -110,18 +110,18 @@ public class ProductService {
     }
 
     @Transactional
-    public boolean checkStockAvailableAndCaching(Long user_id, Long product_id, Integer amount){
+    public String checkStockAvailableAndCaching(Long user_id, Long product_id, Integer amount){
         Product product = this.findById(product_id);
-        if(product.getStock() < amount) return false;
+        if(product.getStock() < amount) return null;
 
-        product.setStock(product.getStock()-amount);
-        // TODO : Key값 전달하기
         // TODO : 중복된 Key를 만드는 요청이 들어온다면?
+        product.setStock(product.getStock()-amount);
+
         String redisKey = "order-%s_%s".formatted(user_id,product_id);
         String redisKeyForValue = "orderValue-%s_%s".formatted(user_id,product_id);
         redisRepository.save(redisKey,amount,4, TimeUnit.MINUTES);
         redisRepository.save(redisKeyForValue,amount,5, TimeUnit.MINUTES);
-        return true;
+        return redisKey;
     }
 
     @Transactional
