@@ -48,7 +48,7 @@ const useApi = () => {
         params,
       });
 
-      const newAuthToken = response.headers["authorization"];
+      const newAuthToken = response.headers["Authorization"];
       console.log(`AuthToken : ${newAuthToken}`);
       if (newAuthToken) {
         localStorage.setItem("Authorization", newAuthToken);
