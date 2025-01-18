@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -13,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import com.app.backend.domain.order.dto.response.OrderResponse;
 import com.app.backend.domain.order.entity.Order;
@@ -45,11 +47,19 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ApiV1UserControllerTest {
 
     @Autowired
@@ -60,27 +70,12 @@ public class ApiV1UserControllerTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    //TODO: 임시 확인용 추가
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
     @MockitoBean
-    private OrderService    orderService;
-
-    @BeforeEach
-    void setUp() {
-        SecurityContextHolder.clearContext();
-    }
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
-
-    private void setupAutentication(User user) {
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities()
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+    private OrderService orderService;
 
     @Test
     @DisplayName("회원가입")
@@ -378,7 +373,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원정보")
     void profileTest1() throws Exception {
         // 회원가입
@@ -400,11 +394,26 @@ public class ApiV1UserControllerTest {
         // 방금 생성된 유저 찾기
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                        .getResponse()
+                                .getHeader("Authorization");
 
         // 회원정보 조회
         mockMvc.perform(
                        get("/api/v1/users/" + user.getId())
+                               .header("Authorization", accessToken)
                                .contentType(MediaType.APPLICATION_JSON)
                )
                .andDo(print())
@@ -444,7 +453,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원정보 조회 - 탈퇴한 회원")
     void profileTest3() throws Exception {
         // 회원가입
@@ -452,7 +460,7 @@ public class ApiV1UserControllerTest {
                 post("/api/v1/signup")
                         .content("""
                                  {
-                                     "email": "test@test.com",
+                                     "email": "test123@test.com",
                                      "password": "test1234!",
                                      "name": "test1",
                                      "address": "address",
@@ -463,11 +471,28 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
-        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 회원 탈퇴
         mockMvc.perform(
                 delete("/api/v1/users/" + user.getId())
+                        .header("Authorization", accessToken)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isOk());
 
@@ -475,6 +500,7 @@ public class ApiV1UserControllerTest {
         ResultActions resultActions = mockMvc
                 .perform(
                         get("/api/v1/users/" + user.getId())
+                                .header("Authorization", accessToken)
                 ).andDo(print());
 
         resultActions
@@ -487,7 +513,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원정보 수정")
     void modifyUserTest1() throws Exception {
         // 회원가입
@@ -495,7 +520,7 @@ public class ApiV1UserControllerTest {
                 post("/api/v1/signup")
                         .content("""
                                  {
-                                     "email": "test@test.com",
+                                     "email": "test123@test.com",
                                      "password": "test1234!",
                                      "name": "test1",
                                      "address": "address",
@@ -506,14 +531,29 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         );
 
-        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 회원정보 수정
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId())
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "name": "modified",
@@ -537,6 +577,7 @@ public class ApiV1UserControllerTest {
         // 수정된 정보 확인
         mockMvc.perform(
                        get("/api/v1/users/" + user.getId())
+                               .header("Authorization", accessToken)
                                .contentType(MediaType.APPLICATION_JSON)
                )
                .andExpect(status().isOk())
@@ -552,7 +593,7 @@ public class ApiV1UserControllerTest {
     void modifyUserTest2() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(
-                        patch("/api/v1/users/3")
+                        patch("/api/v1/users/3000")
                                 .content("""
                                          {
                                              "name": "modified",
@@ -575,7 +616,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원정보 수정 - 잘못된 전화번호 형식")
     void modifyUserTest3() throws Exception {
         // 회원가입
@@ -583,7 +623,7 @@ public class ApiV1UserControllerTest {
                 post("/api/v1/signup")
                         .content("""
                                  {
-                                     "email": "test@test.com",
+                                     "email": "test123@test.com",
                                      "password": "test1234!",
                                      "name": "test1",
                                      "address": "address",
@@ -594,14 +634,29 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         );
 
-        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 잘못된 형식으로 수정 시도
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId())
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "name": "modified",
@@ -624,7 +679,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원정보 수정 - 탈퇴한 회원")
     void modifyUserTest4() throws Exception {
         // 회원가입
@@ -632,7 +686,7 @@ public class ApiV1UserControllerTest {
                 post("/api/v1/signup")
                         .content("""
                                  {
-                                     "email": "test@test.com",
+                                     "email": "test123@test.com",
                                      "password": "test1234!",
                                      "name": "test1",
                                      "address": "address",
@@ -643,13 +697,28 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
-        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 회원 탈퇴
         mockMvc.perform(
                 delete("/api/v1/users/" + user.getId())
+                        .header("Authorization", accessToken)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isOk());
 
@@ -657,6 +726,7 @@ public class ApiV1UserControllerTest {
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId())
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "name": "modified",
@@ -678,7 +748,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("비밀번호 찾기")
     void changePasswordTest1() throws Exception {
         // 회원가입
@@ -700,12 +769,27 @@ public class ApiV1UserControllerTest {
         // 방금 생성된 유저 찾기
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 비밀번호 변경
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "email": "test123@test.com",
@@ -724,7 +808,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 이메일 불일치")
     void changePasswordTest2() throws Exception {
         // 회원가입
@@ -745,12 +828,27 @@ public class ApiV1UserControllerTest {
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 다른 이메일로 비밀번호 변경 시도
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "email": "wrong@test.com",
@@ -770,7 +868,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 새 비밀번호 형식 불일치")
     void changePasswordTest3() throws Exception {
         // 회원가입
@@ -791,12 +888,27 @@ public class ApiV1UserControllerTest {
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 잘못된 형식의 비밀번호로 변경 시도
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "email": "test123@test.com",
@@ -816,7 +928,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 현재 비밀번호와 동일")
     void changePasswordTest4() throws Exception {
         // 회원가입
@@ -837,12 +948,27 @@ public class ApiV1UserControllerTest {
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 현재 비밀번호와 동일한 비밀번호로 변경 시도
         ResultActions resultActions = mockMvc
                 .perform(
                         patch("/api/v1/users/" + user.getId() + "/password")
+                                .header("Authorization", accessToken)
                                 .content("""
                                          {
                                              "email": "test123@test.com",
@@ -862,7 +988,6 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("비밀번호 변경 - 성공")
     void changePasswordTest5() throws Exception {
         // 회원가입
@@ -882,33 +1007,40 @@ public class ApiV1UserControllerTest {
         ).andExpect(status().isCreated());
 
         User user = userRepository.findByEmail("test123@test.com").orElseThrow();
-        String newPassword = "modifyPassword1234!";
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
 
-        // 비밀번호 변경
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
+
+        // 비밀번호 변경 요청
         mockMvc.perform(
                 patch("/api/v1/users/" + user.getId() + "/password")
+                        .header("Authorization", accessToken)
                         .content("""
                                  {
                                      "email": "test123@test.com",
-                                     "newPassword": "%s"
+                                     "newPassword": "modifyPassword1234!"
                                  }
-                                 """.formatted(newPassword))
+                                 """.stripIndent())
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
-        ).andExpect(status().isOk());
-
-        // DB에서 사용자 다시 조회
-        User updatedUser = userRepository.findByEmail("test123@test.com").orElseThrow();
-
-        // 새 비밀번호로 정상적으로 변경되었는지 확인
-        assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword()));
-        // 기존 비밀번호와 다른지 확인
-        assertFalse(passwordEncoder.matches("test1234!", updatedUser.getPassword()));
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.isSuccess").value(true));
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원 탈퇴")
     void deleteUserTest1() throws Exception {
         // 회원가입
@@ -916,7 +1048,7 @@ public class ApiV1UserControllerTest {
                 post("/api/v1/signup")
                         .content("""
                                  {
-                                     "email": "test@test.com",
+                                     "email": "test123@test.com",
                                      "password": "test1234!",
                                      "name": "test1",
                                      "address": "address",
@@ -927,14 +1059,29 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
-        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 회원 탈퇴
         ResultActions resultActions = mockMvc
                 .perform(
                         delete("/api/v1/users/" + user.getId())
+                                .header("Authorization", accessToken)
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
 
@@ -947,12 +1094,11 @@ public class ApiV1UserControllerTest {
                 .andExpect(jsonPath("$.message").value("탈퇴가 성공적으로 이루어졌습니다."));
 
         // DB에서 사용자 다시 조회하여 상태가 DELETED로 변경되었는지 확인
-        User deletedUser = userRepository.findByEmail("test@test.com").orElseThrow();
+        User deletedUser = userRepository.findByEmail("test123@test.com").orElseThrow();
         assertEquals(UserStatus.DELETED.toString(), deletedUser.getStatus());
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원 탈퇴 - 이미 탈퇴한 회원")
     void deleteUserTest2() throws Exception {
         // 회원가입
@@ -960,7 +1106,7 @@ public class ApiV1UserControllerTest {
                 post("/api/v1/signup")
                         .content("""
                                  {
-                                     "email": "test@test.com",
+                                     "email": "test123@test.com",
                                      "password": "test1234!",
                                      "name": "test1",
                                      "address": "address",
@@ -971,13 +1117,28 @@ public class ApiV1UserControllerTest {
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isCreated());
 
-        User user = userRepository.findByEmail("test@test.com").orElseThrow();
+        User user = userRepository.findByEmail("test123@test.com").orElseThrow();
 
-        setupAutentication(user);
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         // 첫 번째 회원 탈퇴
         mockMvc.perform(
                 delete("/api/v1/users/" + user.getId())
+                        .header("Authorization", accessToken)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
         ).andExpect(status().isOk());
 
@@ -985,6 +1146,7 @@ public class ApiV1UserControllerTest {
         ResultActions resultActions = mockMvc
                 .perform(
                         delete("/api/v1/users/" + user.getId())
+                                .header("Authorization", accessToken)
                                 .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                 ).andDo(print());
 
@@ -998,21 +1160,50 @@ public class ApiV1UserControllerTest {
     }
 
     @Test
-    @CustomWithMockAdmin
     @DisplayName("회원 주문 목록 조회")
     void getOrdersByUser() throws Exception {
-        //TODO: 시큐리티 인증 정보를 활용하는 코드가 베이스이기 때문에 시큐리티 적용 시 테스트가 통과하지 못할 것입니다.
-        //Given
-        User customer = User.builder()
-                            .email("user@mail.com")
-                            .password("user")
-                            .name("user")
-                            .address("user address")
-                            .detailAddress("user detail address")
-                            .phone("01000000000")
-                            .status("ACTIVATE")
-                            .role("ROLE_USER")
-                            .build();
+//        User customer = User.builder()
+//                            .email("test123@test.com")
+//                            .password("test1234!")
+//                            .name("user")
+//                            .address("user address")
+//                            .detailAddress("user detail address")
+//                            .phone("01000000000")
+//                            .status("ACTIVATE")
+//                            .role("ROLE_USER")
+//                            .build();
+        mockMvc.perform(
+                post("/api/v1/signup")
+                        .content("""
+                                 {
+                                     "email": "test123@test.com",
+                                     "password": "test1234!",
+                                     "name": "test1",
+                                     "address": "address",
+                                     "detailAddress": "detailAddress",
+                                     "phone": "01012345678"
+                                 }
+                                 """.stripIndent())
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+        ).andExpect(status().isCreated());
+
+        User customer = userRepository.findByEmail("test123@test.com").orElseThrow();
+
+        ResultActions loginResult = mockMvc.perform(
+                post("/api/v1/login")
+                        .content("""
+                                {
+                                    "email": "test123@test.com",
+                                    "password": "test1234!"
+                                }
+                                """)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        String accessToken = loginResult
+                .andReturn()
+                .getResponse()
+                .getHeader("Authorization");
 
         Order order = Order.of(customer, "orderNumber", 1, BigDecimal.valueOf(10000.00),
                                "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
@@ -1024,6 +1215,7 @@ public class ApiV1UserControllerTest {
 
         //When
         ResultActions resultActions = mockMvc.perform(get("/api/v1/users/orders")
+                        .header("Authorization", accessToken)
                                                               .contentType(new MediaType(MediaType.APPLICATION_JSON,
                                                                                          StandardCharsets.UTF_8)))
                                              .andDo(print());

@@ -36,9 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.app.backend.global.error.exception.ErrorCode.HANDLE_ACCESS_DENIED;
-import static com.app.backend.global.error.exception.ErrorCode.INVALID_PASSWORD;
-import static com.app.backend.global.error.exception.ErrorCode.INVALID_INPUT_VALUE;
+import static com.app.backend.global.error.exception.ErrorCode.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -69,11 +67,11 @@ public class ApiV1UserController {
         User user = userService.getUserById(userId);
 
         if (userDetails == null) {
-            throw new UserException(INVALID_INPUT_VALUE);
+            throw new UserException(UNAUTHENTICATION_USER);
         }
 
         if (!Objects.equals(userId, userDetails.getUser().getId())) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHORIZATION_USER);
         }
 
         return new RsData<>(
@@ -94,11 +92,11 @@ public class ApiV1UserController {
         User user = userService.getUserById(userId);
 
         if (userDetails == null) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHENTICATION_USER);
         }
 
         if (!userId.equals(userDetails.getUser().getId())) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHORIZATION_USER);
         }
 
         userService.modifyInfo(user, req);
@@ -120,11 +118,11 @@ public class ApiV1UserController {
         User user = userService.getUserById(userId);
 
         if (userDetails == null) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHENTICATION_USER);
         }
 
         if (!userId.equals(userDetails.getUser().getId())) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHORIZATION_USER);
         }
 
         userService.changePassword(user, req);
@@ -145,11 +143,11 @@ public class ApiV1UserController {
         User user = userService.getUserById(userId);
 
         if (userDetails == null) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHENTICATION_USER);
         }
 
         if (!userId.equals(userDetails.getUser().getId())) {
-            throw new UserException(HANDLE_ACCESS_DENIED);
+            throw new UserException(UNAUTHORIZATION_USER);
         }
 
         userService.deleteUser(user);
@@ -162,11 +160,11 @@ public class ApiV1UserController {
     }
 
     @GetMapping("/users/orders")
-    public RsData<List<OrderResponse>> getOrdersByUser(@AuthenticationPrincipal UserDetails userDetails) {
-        //TODO: 스프링 시큐리티 인증 객체 활용
-//        long userId = ((CustomUserDetails) userDetails).getUser().getId();
-        long                userId = 1L;
+    public RsData<List<OrderResponse>> getOrdersByUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUser().getId();
+
         List<OrderResponse> orders = orderService.getOrdersByUserId(userId);
+
         return new RsData<>(true,
                             String.valueOf(HttpStatus.OK.value()),
                             "회원의 주문 정보를 성공적으로 조회했습니다.",
