@@ -42,6 +42,9 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User customer;
 
+    @Column(name = "payment_uid", nullable = false, unique = true)
+    private String paymentUid;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod method;
@@ -55,16 +58,30 @@ public class Payment extends BaseEntity {
 
     public static Payment of(final Order order,
                              final User customer,
+                             final String paymentUid,
                              final PaymentMethod method,
                              final BigDecimal paidAmount) {
         Payment payment = Payment.builder()
                                  .order(order)
+                                 .paymentUid(paymentUid)
                                  .method(method)
                                  .paidAmount(paidAmount)
+                                 .status(PaymentStatus.SUCCESS)
                                  .build();
         payment.customer = customer;
 //        customer.getPayments().add(this);   //TODO: 연관관계 설정 확인 필요
         return payment;
+    }
+
+    /**
+     * 결제 상태 수정
+     *
+     * @param newPaymentStatus - 새로운 결제 상태
+     */
+    public Payment updatePaymentStatus(final PaymentStatus newPaymentStatus) {
+        if (status != newPaymentStatus)
+            status = newPaymentStatus;
+        return this;
     }
 
 }
