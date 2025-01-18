@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 /**
  * PackageName : com.app.backend.domain.order.dto.request
  * FileName    : PaymentRequest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 18.
  * Description :
  */

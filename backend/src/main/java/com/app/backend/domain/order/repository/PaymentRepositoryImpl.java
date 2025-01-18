@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 /**
  * PackageName : com.app.backend.domain.order.repository
  * FileName    : PaymentRepositoryImpl
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 17.
  * Description :
  */

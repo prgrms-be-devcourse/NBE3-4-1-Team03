@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
 /**
  * PackageName : com.app.backend.domain.order.repository
  * FileName    : OrderProductRepositoryTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */

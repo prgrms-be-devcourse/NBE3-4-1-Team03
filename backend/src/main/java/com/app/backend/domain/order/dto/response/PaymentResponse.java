@@ -11,7 +11,7 @@ import lombok.Getter;
 /**
  * PackageName : com.app.backend.domain.order.dto.response
  * FileName    : PaymentResponse
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 18.
  * Description :
  */

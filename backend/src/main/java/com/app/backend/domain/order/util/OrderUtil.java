@@ -8,7 +8,7 @@ import java.util.Random;
 /**
  * PackageName : com.app.backend.domain.order.util
  * FileName    : OrderUtil
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */

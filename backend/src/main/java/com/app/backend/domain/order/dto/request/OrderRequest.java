@@ -12,7 +12,7 @@ import lombok.NonNull;
 /**
  * PackageName : com.app.backend.domain.order.dto.request
  * FileName    : OrderRequest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */
