@@ -1,6 +1,8 @@
 package com.app.backend.global.initdata;
 
 import com.app.backend.domain.order.entity.Order;
+import com.app.backend.domain.order.entity.OrderProduct;
+import com.app.backend.domain.order.repository.OrderProductRepository;
 import com.app.backend.domain.order.repository.OrderRepository;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.repository.ProductRepository;
@@ -25,17 +27,19 @@ public class BaseInitData {
 
     private static final Random RANDOM = new Random();
 
-    private final UserRepository    userRepository;
-    private final ProductRepository productRepository;
-    private final OrderRepository   orderRepository;
-    private final PasswordEncoder   passwordEncoder;
+    private final UserRepository         userRepository;
+    private final ProductRepository      productRepository;
+    private final OrderRepository        orderRepository;
+    private final PasswordEncoder        passwordEncoder;
+    private final OrderProductRepository orderProductRepository;
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     void init() throws InterruptedException {
-        List<User>    dummyUsers    = createDummyUsers(5);
-        List<Product> dummyProducts = createDummyProducts(10);
-        List<Order>   dummyOrders   = createDummyOrders(20, dummyUsers);
+        List<User>         dummyUsers         = createDummyUsers(5);
+        List<Product>      dummyProducts      = createDummyProducts(10);
+        List<Order>        dummyOrders        = createDummyOrders(20, dummyUsers);
+        List<OrderProduct> dummyOrderProducts = createDummyOrderProducts(30, dummyOrders, dummyProducts);
     }
 
     private List<User> createDummyUsers(final int size) throws InterruptedException {
@@ -44,7 +48,7 @@ public class BaseInitData {
         List<User> users = new ArrayList<>();
         for (int i = 1; i <= size; i++) {
             Thread.sleep(1);
-            String userStr = "user" + String.format("%0" + String.valueOf("size").length() + "d", i);
+            String userStr = "user" + String.format("%0" + String.valueOf(size).length() + "d", i);
             User user = User.builder()
                             .email(userStr + "@mail.com")
                             .password(passwordEncoder.encode(userStr))
@@ -68,7 +72,7 @@ public class BaseInitData {
         List<Product> products = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Thread.sleep(1);
-            String productStr = "product" + String.format("%0" + String.valueOf("size").length() + "d", i);
+            String productStr = "product" + String.format("%0" + String.valueOf(size).length() + "d", i);
             Product product = Product.builder()
                                      .name(productStr)
                                      .description(productStr + " description")
@@ -90,7 +94,7 @@ public class BaseInitData {
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Thread.sleep(1);
-            String orderStr = "order" + String.format("%0" + String.valueOf("size").length() + "d", i);
+            String orderStr = "order" + String.format("%0" + String.valueOf(size).length() + "d", i);
             User   customer = users.get(RANDOM.nextInt(users.size()));
             Order order = Order.of(customer, orderStr, 3, BigDecimal.valueOf(50000),
                                    "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
@@ -99,6 +103,24 @@ public class BaseInitData {
         }
 
         return orders;
+    }
+
+    private List<OrderProduct> createDummyOrderProducts(final int size, final List<Order> orders,
+                                                        final List<Product> products) throws InterruptedException {
+        if (orderProductRepository.count() > 0) return List.of();
+
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            Thread.sleep(1);
+            Product product = products.get(RANDOM.nextInt(products.size()));
+            OrderProduct orderProduct = OrderProduct.of(
+                    orders.get(RANDOM.nextInt(orders.size())), product, RANDOM.nextInt(9) + 1, product.getPrice()
+            );
+            orderProductRepository.save(orderProduct);
+            orderProducts.add(orderProduct);
+        }
+
+        return orderProducts;
     }
 
 }
