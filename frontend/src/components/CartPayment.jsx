@@ -36,7 +36,7 @@ const CartPayment = () => {
     };
 
     try {
-      const response = await request("/orders", "POST", productData);
+      const response = await request("/orders", "POST", productData, {}, true);
       alert(response.message);
       navigate("/mypage");
     } catch (err) {
