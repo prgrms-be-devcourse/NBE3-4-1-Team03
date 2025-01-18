@@ -1,11 +1,9 @@
 package com.app.backend.global.redis.repository;
 
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
-
-import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -23,5 +21,9 @@ public class RedisRepository {
 
     public void delete(String key) {
         redisTemplate.delete(key);
+    }
+
+    public boolean isKeyExists(String redisKey) {
+        return redisTemplate.hasKey(redisKey);
     }
 }
