@@ -1,4 +1,3 @@
-// Signup.js
 import { useNavigate } from "react-router-dom";
 
 import useApi from "../hooks/useApi";
@@ -11,7 +10,7 @@ const Signup = () => {
   const { request, loading } = useApi();
 
   const validationRules = {
-    username: [
+    name: [
       (value) => !value && "사용자 이름을 입력해주세요.",
       (value) =>
         value.length < 1 ||
@@ -35,7 +34,7 @@ const Signup = () => {
         "비밀번호와 비밀번호 확인이 일치하지 않습니다.",
     ],
     address: [(value) => !value && "주소를 입력해주세요."],
-    address_detail: [(value) => !value && "상세 주소를 입력해주세요."],
+    detailAddress: [(value) => !value && "상세 주소를 입력해주세요."],
     phone: [
       (value) => !value && "전화번호를 입력해주세요.",
       (value) =>
@@ -46,12 +45,12 @@ const Signup = () => {
 
   const { formData, errors, handleChange, validate } = useFormValidation(
     {
-      username: "",
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
       address: "",
-      address_detail: "",
+      detailAddress: "",
       phone: "",
     },
     validationRules
@@ -63,8 +62,19 @@ const Signup = () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) return;
 
+    const requestData = {
+      email: formData.email,
+      password: formData.password,
+      name: formData.name,
+      address: formData.address,
+      detailAddress: formData.detailAddress,
+      phone: formData.phone,
+    };
+
+    console.log(requestData);
+
     try {
-      const response = await request("/signup", "POST", formData);
+      const response = await request("/signup", "POST", formData, {}, false);
       alert(response.message);
       navigate("/login");
     } catch (err) {
@@ -80,12 +90,12 @@ const Signup = () => {
         </h1>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <InputField
-            id="username"
-            name="username"
+            id="name"
+            name="name"
             label="사용자 이름"
-            value={formData.username}
+            value={formData.name}
             onChange={handleChange}
-            error={errors.username}
+            error={errors.name}
             placeholder="사용자 이름을 입력하세요"
           />
           <InputField
@@ -127,12 +137,12 @@ const Signup = () => {
             placeholder="주소를 입력하세요"
           />
           <InputField
-            id="address_detail"
-            name="address_detail"
+            id="detailAddress"
+            name="detailAddress"
             label="상세 주소"
-            value={formData.address_detail}
+            value={formData.detailAddress}
             onChange={handleChange}
-            error={errors.address_detail}
+            error={errors.detailAddress}
             placeholder="상세 주소를 입력하세요"
           />
           <InputField
