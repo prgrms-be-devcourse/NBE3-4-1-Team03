@@ -11,7 +11,7 @@ const OkCancelModal = ({
   if (!isOpen) return null; // 모달이 열려있지 않으면 아무 것도 렌더링하지 않음
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <p>{message}</p>
         <div className="mt-4">

@@ -13,15 +13,32 @@ const useApi = () => {
     baseURL,
     headers: {
       "Content-Type": "application/json",
+      Authorization: "",
     },
+    withCredentials: true,
     validateStatus: (status) => {
       return status >= 200 && status < 500;
     },
   });
 
-  const request = async (endpoint, method = "GET", data = {}, params = {}) => {
+  const request = async (
+    endpoint,
+    method = "GET",
+    data = {},
+    params = {},
+    includeAuth
+  ) => {
     setLoading(true);
     setError(null);
+
+    if (includeAuth) {
+      const token = localStorage.getItem("Authorization") || "";
+      if (token) {
+        apiClient.defaults.headers["Authorization"] = token;
+      }
+    } else {
+      delete apiClient.defaults.headers["Authorization"];
+    }
 
     try {
       const response = await apiClient.request({
@@ -30,6 +47,12 @@ const useApi = () => {
         data,
         params,
       });
+
+      const newAuthToken = response.headers["authorization"];
+      console.log(`AuthToken : ${newAuthToken}`);
+      if (newAuthToken) {
+        localStorage.setItem("Authorization", newAuthToken);
+      }
 
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || "Unknown error");

@@ -24,7 +24,13 @@ const ProductDetailModal = ({ productId, onClose }) => {
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
-        const response = await request(`/products/${productId}`);
+        const response = await request(
+          `/products/${productId}`,
+          "GET",
+          {},
+          {},
+          false
+        );
         console.log(response.data);
         setProductInfo(response.data);
         setError(null);
