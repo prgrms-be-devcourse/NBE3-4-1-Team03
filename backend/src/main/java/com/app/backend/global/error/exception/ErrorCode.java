@@ -38,7 +38,11 @@ public enum ErrorCode {
     //Payment
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, false, "E001", "결제 실패"),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, false, "E002", "결제 정보가 존재하지 않음"),
-    INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, false, "E003", "잔액이 부족함");
+    INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, false, "E003", "잔액이 부족함"),
+    PAYMENT_UID_CONFLICT(HttpStatus.INTERNAL_SERVER_ERROR, false, "E004", "이미 등록된 결제 UID"),
+    INVALID_PAYMENT_STATUS(HttpStatus.BAD_REQUEST, false, "E005", "잘못된 결제 상태"),
+    PAYMENT_BUYER_MISMATCH(HttpStatus.BAD_REQUEST, false, "E006", "결제 정보와 결제 회원 불일치"),
+    PAYMENT_ORDER_MISMATCH(HttpStatus.BAD_REQUEST, false, "E007", "결제 정보와 주문 정보 불일치");
 
     private final HttpStatus status;
     private final boolean    isSuccess;
