@@ -2,8 +2,11 @@ package com.app.backend.global.initdata;
 
 import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.entity.OrderProduct;
+import com.app.backend.domain.order.entity.Payment;
+import com.app.backend.domain.order.entity.PaymentMethod;
 import com.app.backend.domain.order.repository.OrderProductRepository;
 import com.app.backend.domain.order.repository.OrderRepository;
+import com.app.backend.domain.order.repository.PaymentRepository;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.domain.user.entity.User;
@@ -12,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +26,11 @@ public class InitDummyData {
     private final Random RANDOM = new Random();
 
     public List<User> createDummyUsers(final UserRepository userRepository, final int size) {
+        int count = (int) userRepository.count();
+
         List<User> users = new ArrayList<>();
-        for (int i = 1; i <= size; i++) {
-            String userStr = "user" + String.format("%0" + String.valueOf("size").length() + "d", i);
+        for (int i = 1 + count; i <= size + count; i++) {
+            String userStr = "user" + String.format("%0" + String.valueOf(size + count).length() + "d", i);
             User user = User.builder()
                             .email(userStr + "@mail.com")
                             .password(userStr)
@@ -43,9 +49,11 @@ public class InitDummyData {
     }
 
     public List<Product> createDummyProducts(final ProductRepository productRepository, final int size) {
+        int count = (int) productRepository.count();
+
         List<Product> products = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            String productStr = "product" + String.format("%0" + String.valueOf("size").length() + "d", i);
+        for (int i = 1 + count; i <= size + count; i++) {
+            String productStr = "product" + String.format("%0" + String.valueOf(size + count).length() + "d", i);
             Product product = Product.builder()
                                      .name(productStr)
                                      .description(productStr + " description")
@@ -61,10 +69,12 @@ public class InitDummyData {
         return products;
     }
 
-    public List<Order> createDummyOrders(final OrderRepository orderRepository, final int size, final User customer) {
+    public List<Order> createDummyOrders(final OrderRepository orderRepository, int size, final User customer) {
+        int count = (int) orderRepository.count();
+
         List<Order> orders = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            String orderStr = "order" + String.format("%0" + String.valueOf("size").length() + "d", i);
+        for (int i = 1 + count; i <= size + count; i++) {
+            String orderStr = "order" + String.format("%0" + String.valueOf(size + count).length() + "d", i);
             Order order = Order.of(customer, orderStr, 3, BigDecimal.valueOf(50000),
                                    "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
             orderRepository.save(order);
@@ -79,6 +89,14 @@ public class InitDummyData {
         OrderProduct orderProduct = OrderProduct.of(order, product, RANDOM.nextInt(9) + 1, product.getPrice());
         orderProductRepository.save(orderProduct);
         return orderProduct;
+    }
+
+    public Payment createDummyPayment(final PaymentRepository paymentRepository,
+                                      final Order order, final User user) {
+        Payment payment = Payment.of(order, user, UUID.randomUUID().toString().replace("-", ""),
+                                     PaymentMethod.CREDIT_CARD, order.getTotalPrice());
+        paymentRepository.save(payment);
+        return payment;
     }
 
 }

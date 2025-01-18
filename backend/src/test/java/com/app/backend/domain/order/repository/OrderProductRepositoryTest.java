@@ -61,7 +61,7 @@ class OrderProductRepositoryTest {
 
     @ParameterizedTest
     @CsvSource({"6", "7", "8", "9", "10"})
-    @DisplayName("findById")
+    @DisplayName("findById, unknown order product id")
     void findById_unknownId(final long orderProductId) {
         //Given
 
