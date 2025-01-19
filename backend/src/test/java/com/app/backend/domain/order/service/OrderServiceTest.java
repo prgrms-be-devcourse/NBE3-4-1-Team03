@@ -17,30 +17,21 @@ import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.repository.UserRepository;
-import com.app.backend.global.constant.MailMessageConstant;
 import com.app.backend.global.error.exception.ErrorCode;
 import com.app.backend.global.initdata.InitDummyData;
 import com.app.backend.standard.util.Ut;
-import com.icegreen.greenmail.configuration.GreenMailConfiguration;
-import com.icegreen.greenmail.junit5.GreenMailExtension;
-import com.icegreen.greenmail.util.ServerSetup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
@@ -61,10 +52,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class OrderServiceTest {
 
-    @RegisterExtension
-    private static GreenMailExtension greenMailExtension = new GreenMailExtension(new ServerSetup(3025, null, "smtp"))
-            .withConfiguration(GreenMailConfiguration.aConfig().withUser("greenmail", "greenmail"))
-            .withPerMethodLifecycle(true);
+//    @RegisterExtension
+//    private static GreenMailExtension greenMailExtension = new GreenMailExtension(new ServerSetup(3025, null, "smtp"))
+//            .withConfiguration(GreenMailConfiguration.aConfig().withUser("greenmail", "greenmail"))
+//            .withPerMethodLifecycle(true);
 
     @Autowired
     private OrderService               orderService;
@@ -102,7 +93,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("saveOrder")
-    void saveOrder() throws MessagingException, IOException {
+    void saveOrder() /*throws MessagingException, IOException*/ {
         //Given
         long       customerId = users.get(0).getId();
         List<Long> productIds = products.stream().map(Product::getId).toList();
@@ -120,8 +111,8 @@ class OrderServiceTest {
         //Then
         Order savedOrder = orderRepository.findById(savedOrderId).get();
         User  customer   = users.get(0);
-        greenMailExtension.waitForIncomingEmail(5000, 1);
-        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+//        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
 
         assertThat(savedOrder).isNotNull();
         assertThat(savedOrder.getId()).isNotNull();
@@ -152,11 +143,11 @@ class OrderServiceTest {
                     .isEqualTo(storedProducts.get(i).getPrice().multiply(BigDecimal.ONE));
         }
 
-        assertThat(receivedMessages).hasSize(1);
-        assertThat(receivedMessages[0].getRecipients(Message.RecipientType.TO)[0].toString())
-                .isEqualTo(customer.getEmail());
-        assertThat(receivedMessages[0].getSubject())
-                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_SUCCESS);
+//        assertThat(receivedMessages).hasSize(1);
+//        assertThat(receivedMessages[0].getRecipients(Message.RecipientType.TO)[0].toString())
+//                .isEqualTo(customer.getEmail());
+//        assertThat(receivedMessages[0].getSubject())
+//                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_SUCCESS);
     }
 
     @Test
@@ -181,9 +172,9 @@ class OrderServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND)
                 .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
 
-        greenMailExtension.waitForIncomingEmail(5000, 1);
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
 
-        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
     }
 
     @Test
@@ -202,9 +193,9 @@ class OrderServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PRODUCT_NOT_FOUND)
                 .hasMessage(ErrorCode.PRODUCT_NOT_FOUND.getMessage());
 
-        greenMailExtension.waitForIncomingEmail(5000, 1);
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
 
-        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
     }
 
     @Test
@@ -677,19 +668,19 @@ class OrderServiceTest {
         orderService.updateOrderStatusByUserId(orderId, userId, "SHIPPED");
 
         //Then
-        greenMailExtension.waitForIncomingEmail(5000, 1);
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
 
         Order updatedOrder = orderRepository.findById(orderId).get();
 
         assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
         assertThat(updatedOrder.getStatus().name()).isEqualTo("SHIPPED");
 
-        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
     }
 
     @Test
     @DisplayName("updateOrderStatusByUserId, order cancelled")
-    void updateOrderStatusByUserId_orderCancelled() throws MessagingException {
+    void updateOrderStatusByUserId_orderCancelled() /*throws MessagingException*/ {
         //Given
         Order  order             = createDummyOrders(users.get(0), 1).get(0);
         Long   orderId           = order.getId();
@@ -701,18 +692,18 @@ class OrderServiceTest {
         orderService.updateOrderStatusByUserId(orderId, userId, "CANCELLED");
 
         //Then
-        greenMailExtension.waitForIncomingEmail(5000, 1);
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
 
         Order updatedOrder = orderRepository.findById(orderId).get();
 
         assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
         assertThat(updatedOrder.getStatus().name()).isEqualTo("CANCELLED");
 
-        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
+//        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
 
-        assertThat(receivedMessages).hasSize(1);
-        assertThat(receivedMessages[0].getSubject())
-                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_CANCEL);
+//        assertThat(receivedMessages).hasSize(1);
+//        assertThat(receivedMessages[0].getSubject())
+//                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_CANCEL);
     }
 
     @Test

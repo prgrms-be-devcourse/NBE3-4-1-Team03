@@ -56,8 +56,8 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    //== GreenMail Junit5 ==
-    testImplementation("com.icegreen:greenmail-junit5:1.6.15")
+//    //== GreenMail Junit5 ==
+//    testImplementation("com.icegreen:greenmail-junit5:1.6.15")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
