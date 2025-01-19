@@ -187,6 +187,22 @@ public class OrderService {
     }
 
     /**
+     * 주문 정보 단건 상세 조회
+     *
+     * @param orderId - 주문 ID
+     * @return 관리자 주문 상세 정보 응답(AdminOrderDetailResponse) 객체
+     */
+    public AdminOrderDetailResponse getOrderDetail(long orderId) {
+        //NOTE: 관리자 권한 계정 대상
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        //TODO: payment 값 필요.
+        Payment payment = null;
+
+        return AdminOrderDetailResponse.of(order, payment);
+    }
+    /**
      * 주문 번호 검증
      *
      * @param orderNumber - 주문 번호
