@@ -656,57 +656,57 @@ class OrderServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-//    @Test
-//    @DisplayName("updateOrderStatusByUserId")
-//    void updateOrderStatusByUserId() {
-//        //Given
-//        Order  order             = createDummyOrders(users.get(0), 1).get(0);
-//        Long   orderId           = order.getId();
-//        Long   userId            = order.getCustomer().getId();
-//        String beforeOrderStatus = order.getStatus().name();
-//        afterEach();
-//
-//        //When
-//        orderService.updateOrderStatusByUserId(orderId, userId, "SHIPPED");
-//
-//        //Then
-////        greenMailExtension.waitForIncomingEmail(5000, 1);
-//
-//        Order updatedOrder = orderRepository.findById(orderId).get();
-//
-//        assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
-//        assertThat(updatedOrder.getStatus().name()).isEqualTo("SHIPPED");
-//
-////        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
-//    }
+    @Test
+    @DisplayName("updateOrderStatusByUserId")
+    void updateOrderStatusByUserId() {
+        //Given
+        Order  order             = createDummyOrders(users.get(0), 1).get(0);
+        Long   orderId           = order.getId();
+        Long   userId            = order.getCustomer().getId();
+        String beforeOrderStatus = order.getStatus().name();
+        afterEach();
 
-//    @Test
-//    @DisplayName("updateOrderStatusByUserId, order cancelled")
-//    void updateOrderStatusByUserId_orderCancelled() /*throws MessagingException*/ {
-//        //Given
-//        Order  order             = createDummyOrders(users.get(0), 1).get(0);
-//        Long   orderId           = order.getId();
-//        Long   userId            = order.getCustomer().getId();
-//        String beforeOrderStatus = order.getStatus().name();
-//        afterEach();
-//
-//        //When
-//        orderService.updateOrderStatusByUserId(orderId, userId, "CANCELLED");
-//
-//        //Then
-////        greenMailExtension.waitForIncomingEmail(5000, 1);
-//
-//        Order updatedOrder = orderRepository.findById(orderId).get();
-//
-//        assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
-//        assertThat(updatedOrder.getStatus().name()).isEqualTo("CANCELLED");
-//
-////        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
-//
-////        assertThat(receivedMessages).hasSize(1);
-////        assertThat(receivedMessages[0].getSubject())
-////                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_CANCEL);
-//    }
+        //When
+        orderService.updateOrderStatusByUserId(orderId, userId, "SHIPPED");
+
+        //Then
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+
+        Order updatedOrder = orderRepository.findById(orderId).get();
+
+        assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
+        assertThat(updatedOrder.getStatus().name()).isEqualTo("SHIPPED");
+
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("updateOrderStatusByUserId, order cancelled")
+    void updateOrderStatusByUserId_orderCancelled() /*throws MessagingException*/ {
+        //Given
+        Order  order             = createDummyOrders(users.get(0), 1).get(0);
+        Long   orderId           = order.getId();
+        Long   userId            = order.getCustomer().getId();
+        String beforeOrderStatus = order.getStatus().name();
+        afterEach();
+
+        //When
+        orderService.updateOrderStatusByUserId(orderId, userId, "CANCELLED");
+
+        //Then
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+
+        Order updatedOrder = orderRepository.findById(orderId).get();
+
+        assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
+        assertThat(updatedOrder.getStatus().name()).isEqualTo("CANCELLED");
+
+//        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
+
+//        assertThat(receivedMessages).hasSize(1);
+//        assertThat(receivedMessages[0].getSubject())
+//                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_CANCEL);
+    }
 
     @Test
     @DisplayName("deleteOrderById")
