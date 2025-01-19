@@ -4,6 +4,7 @@ import Signup from "./pages/Signup";
 import Main from "./pages/Main";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import NotFound404 from "./pages/NotFound404";
 
 import ProtectedRoute from "./pages/PrivateRoute";
 
@@ -48,6 +49,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/*" element={<NotFound404 />} />
         </Routes>
       </Layout>
     </>
