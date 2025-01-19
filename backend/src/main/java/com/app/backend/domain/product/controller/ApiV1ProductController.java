@@ -5,6 +5,7 @@ import com.app.backend.domain.product.dto.ProductPageDto;
 import com.app.backend.domain.product.dto.ProductWithoutDescriptionDto;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.service.ProductService;
+import com.app.backend.domain.user.service.UserService;
 import com.app.backend.global.rs.RsData;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
@@ -12,6 +13,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +25,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class ApiV1ProductController {
     private final ProductService productService;
+    private final UserService userService;
 
     @GetMapping
     @Transactional(readOnly = true)
@@ -75,9 +79,10 @@ public class ApiV1ProductController {
 
     @PostMapping
     @Transactional
-    public RsData<Void> add(@RequestBody @Valid AddProductReqBody addProductReqBody) {
+    public RsData<Void> add(@RequestBody @Valid AddProductReqBody addProductReqBody,
+                            @AuthenticationPrincipal UserDetails userDetails) {
 
-        //TODO: 권한 확인
+        userService.isAdmin(userDetails);
 
         Product product = productService.add(addProductReqBody);
 
@@ -106,9 +111,10 @@ public class ApiV1ProductController {
     @Transactional
     public RsData<Void> modify(
             @PathVariable long id,
-            @RequestBody @Valid ModifyProductReqBody modifyProductReqBody
+            @RequestBody @Valid ModifyProductReqBody modifyProductReqBody,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        //TODO: 권한 확인
+        userService.isAdmin(userDetails);
 
         Product product = productService.findById(id);
 
@@ -125,10 +131,10 @@ public class ApiV1ProductController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public RsData<Void> delete(
-            @PathVariable long id
+    public RsData<Void> delete(@PathVariable long id,
+                               @AuthenticationPrincipal UserDetails userDetails
     ) {
-        //TODO: 권한 확인
+        userService.isAdmin(userDetails);
 
         Product product = this.productService.findById(id);
 

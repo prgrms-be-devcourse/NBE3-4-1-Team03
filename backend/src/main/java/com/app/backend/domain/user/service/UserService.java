@@ -8,7 +8,9 @@ import com.app.backend.domain.user.entity.UserRole;
 import com.app.backend.domain.user.entity.UserStatus;
 import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.repository.UserRepository;
+import com.app.backend.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,4 +80,9 @@ public class UserService {
         user.deleteUser();
     }
 
+    public void isAdmin(UserDetails userDetails) {
+        if (!userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")))
+            throw new UserException(ErrorCode.HANDLE_ACCESS_DENIED);
+    }
 }
