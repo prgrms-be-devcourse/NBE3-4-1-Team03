@@ -22,11 +22,15 @@ public class JwtLogoutHandler implements LogoutHandler {
 
         if (authorization != null) {
             accessToken = authorization.substring(7);
-        }
 
-        if(!jwtUtil.isExpired(accessToken)) {
-            String username = jwtUtil.getUsername(accessToken);
-            redisRepository.delete(username);
+            try {
+                if (!jwtUtil.isExpired(accessToken)) {
+                    String username = jwtUtil.getUsername(accessToken);
+                    redisRepository.delete(username);
+                }
+            } catch (Exception e) {
+                // 어떤 예외가 있어도 그냥 로그아웃 성공하게 수정
+            }
         }
 
         Cookie cookie = new Cookie("refreshToken", null);
