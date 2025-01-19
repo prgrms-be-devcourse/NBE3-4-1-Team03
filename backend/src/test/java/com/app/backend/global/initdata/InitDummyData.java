@@ -2,11 +2,8 @@ package com.app.backend.global.initdata;
 
 import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.entity.OrderProduct;
-import com.app.backend.domain.order.entity.Payment;
-import com.app.backend.domain.order.entity.PaymentMethod;
 import com.app.backend.domain.order.repository.OrderProductRepository;
 import com.app.backend.domain.order.repository.OrderRepository;
-import com.app.backend.domain.order.repository.PaymentRepository;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.domain.user.entity.User;
@@ -15,7 +12,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
