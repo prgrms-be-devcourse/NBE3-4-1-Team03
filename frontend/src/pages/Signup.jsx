@@ -62,17 +62,6 @@ const Signup = () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) return;
 
-    const requestData = {
-      email: formData.email,
-      password: formData.password,
-      name: formData.name,
-      address: formData.address,
-      detailAddress: formData.detailAddress,
-      phone: formData.phone,
-    };
-
-    console.log(requestData);
-
     try {
       const response = await request("/signup", "POST", formData, {}, false);
       alert(response.message);
