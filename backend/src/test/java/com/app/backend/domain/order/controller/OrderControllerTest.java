@@ -18,6 +18,7 @@ import com.app.backend.domain.order.dto.request.OrderProductRequest;
 import com.app.backend.domain.order.dto.request.OrderRequest;
 import com.app.backend.domain.order.dto.response.OrderResponse;
 import com.app.backend.domain.order.entity.Order;
+import com.app.backend.domain.order.exception.OrderException;
 import com.app.backend.domain.order.repository.OrderRepository;
 import com.app.backend.domain.order.service.OrderService;
 import com.app.backend.domain.user.entity.User;
@@ -41,13 +42,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 /**
  * PackageName : com.app.backend.domain.order.controller
  * FileName    : OrderControllerTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 16.
  * Description :
  */
@@ -138,9 +138,10 @@ class OrderControllerTest {
                                              errorCode.getMessage());
 
         resultActions.andExpect(status().isBadRequest())
-                     .andExpect(result -> assertThat(
-                             result.getResolvedException() instanceof MethodArgumentNotValidException)
-                     )
+                     .andExpect(result -> {
+                         assertThat(result.getResolvedException() instanceof OrderException).isTrue();
+                         assertThat(result.getResolvedException().getMessage()).isEqualTo(errorCode.getMessage());
+                     })
                      .andExpect(content().json(objectMapper.writeValueAsString(rsData)))
                      .andDo(print());
     }
@@ -167,9 +168,10 @@ class OrderControllerTest {
                                              errorCode.getMessage());
 
         resultActions.andExpect(status().isBadRequest())
-                     .andExpect(result -> assertThat(
-                             result.getResolvedException() instanceof MethodArgumentNotValidException)
-                     )
+                     .andExpect(result -> {
+                         assertThat(result.getResolvedException() instanceof OrderException).isTrue();
+                         assertThat(result.getResolvedException().getMessage()).isEqualTo(errorCode.getMessage());
+                     })
                      .andExpect(content().json(objectMapper.writeValueAsString(rsData)))
                      .andDo(print());
     }
@@ -216,8 +218,8 @@ class OrderControllerTest {
 
         resultActions.andExpect(status().isBadRequest())
                      .andExpect(result -> assertThat(
-                             result.getResolvedException() instanceof HandlerMethodValidationException)
-                     )
+                             result.getResolvedException() instanceof HandlerMethodValidationException
+                     ).isTrue())
                      .andExpect(content().json(objectMapper.writeValueAsString(rsData)))
                      .andDo(print());
     }
@@ -262,8 +264,8 @@ class OrderControllerTest {
 
         resultActions.andExpect(status().isBadRequest())
                      .andExpect(result -> assertThat(
-                             result.getResolvedException() instanceof HandlerMethodValidationException)
-                     )
+                             result.getResolvedException() instanceof HandlerMethodValidationException
+                     ).isTrue())
                      .andExpect(content().json(objectMapper.writeValueAsString(rsData)))
                      .andDo(print());
     }

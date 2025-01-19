@@ -34,7 +34,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
@@ -43,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * PackageName : com.app.backend.domain.order.service
  * FileName    : OrderServiceTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 16.
  * Description :
  */
@@ -99,10 +98,10 @@ class OrderServiceTest {
         OrderRequest orderRequest = new OrderRequest(productInfo);
 
         //When
-        orderService.saveOrder(customerId, orderRequest);
+        long savedOrderId = orderService.saveOrder(customerId, orderRequest);
 
         //Then
-        Order savedOrder = orderRepository.findAll().get(0);
+        Order savedOrder = orderRepository.findById(savedOrderId).get();
         User  customer   = users.get(0);
 
         assertThat(savedOrder).isNotNull();
@@ -377,6 +376,16 @@ class OrderServiceTest {
 
         //Then
         assertThat(orderResponses).hasSize(5);
+        for (int i = 0; i < orders.size(); i++) {
+            assertThat(orderResponses.get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
+            assertThat(orderResponses.get(i).getName()).isEqualTo(orders.get(i).getCustomer().getName());
+            assertThat(orderResponses.get(i).getTotalAmount()).isEqualTo(orders.get(i).getTotalAmount());
+            assertThat(orderResponses.get(i).getTotalPrice().compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+            assertThat(orderResponses.get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
+            assertThat(orderResponses.get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
+            assertThat(orderResponses.get(i).getCreatedDate())
+                    .isEqualTo(Ut.Str.localDateTimeToString(orders.get(i).getCreatedDate()));
+        }
     }
 
     @Test
@@ -447,27 +456,52 @@ class OrderServiceTest {
     @DisplayName("getAllOrders, List")
     void getAllOrders_typeList() {
         //Given
-        List<Order> createdOrders = createDummyOrder(users.get(0), 10);
+        List<Order> orders = createDummyOrder(users.get(0), 10);
+        afterEach();
 
         //When
-        List<OrderResponse> findOrders = orderService.getAllOrders();
+        List<OrderResponse> orderResponses = orderService.getAllOrders();
 
         //Then
-        assertThat(findOrders).hasSize(createdOrders.size());
+        assertThat(orderResponses).hasSize(orders.size());
+        for (int i = 0; i < orders.size(); i++) {
+            assertThat(orderResponses.get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
+            assertThat(orderResponses.get(i).getName()).isEqualTo(orders.get(i).getCustomer().getName());
+            assertThat(orderResponses.get(i).getTotalAmount()).isEqualTo(orders.get(i).getTotalAmount());
+            assertThat(orderResponses.get(i).getTotalPrice().compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+            assertThat(orderResponses.get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
+            assertThat(orderResponses.get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
+            assertThat(orderResponses.get(i).getCreatedDate())
+                    .isEqualTo(Ut.Str.localDateTimeToString(orders.get(i).getCreatedDate()));
+        }
     }
 
     @Test
     @DisplayName("getAllOrders, Page")
     void getAllOrders_typePage() {
         //Given
-        List<Order> createdOrders = createDummyOrder(users.get(0), 100);
-        Pageable    pageRequest   = PageRequest.of(0, 10);
+        List<Order> orders      = createDummyOrder(users.get(0), 100);
+        Pageable    pageRequest = PageRequest.of(0, 10);
+        afterEach();
 
         //When
-        Page<OrderResponse> findOrders = orderService.getAllOrders(pageRequest);
+        List<OrderResponse> orderResponses = orderService.getAllOrders(pageRequest).getContent();
 
         //Then
-        assertThat(findOrders.getContent()).hasSize(pageRequest.getPageSize());
+        orders = orders.subList(0, 10);
+
+        assertThat(orderResponses).hasSizeLessThanOrEqualTo(pageRequest.getPageSize());
+        for (int i = 0; i < orders.size(); i++) {
+            assertThat(orderResponses.get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
+            assertThat(orderResponses.get(i).getName()).isEqualTo(orders.get(i).getCustomer().getName());
+            assertThat(orderResponses.get(i).getTotalAmount()).isEqualTo(orders.get(i).getTotalAmount());
+            assertThat(orderResponses.get(i).getTotalPrice()
+                                     .compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+            assertThat(orderResponses.get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
+            assertThat(orderResponses.get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
+            assertThat(orderResponses.get(i).getCreatedDate())
+                    .isEqualTo(Ut.Str.localDateTimeToString(orders.get(i).getCreatedDate()));
+        }
     }
 
     @Test
