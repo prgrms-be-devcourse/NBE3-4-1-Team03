@@ -36,11 +36,7 @@ public class AdminController {
     private final OrderService orderService;
 
     @GetMapping("/orders")
-    public RsData<List<AdminOrderResponse>> getAllOrders(@AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println("userDetails = " + userDetails);
-        if (!userDetails.getAuthorities().stream()
-                        .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")))   //관리자 권한 확인
-            throw new UserException(ErrorCode.HANDLE_ACCESS_DENIED);
+    public RsData<List<AdminOrderResponse>> getAllOrders() {
 
         List<AdminOrderResponse> allOrders = orderService.getAllOrders();
 
@@ -51,12 +47,7 @@ public class AdminController {
     }
 
     @GetMapping("/orders/{id}")
-    public RsData<AdminOrderDetailResponse> getOrderDetail(@AuthenticationPrincipal UserDetails userDetails,
-                                                         @PathVariable("id") long id) {
-        System.out.println("userDetails = " + userDetails);
-        if (!userDetails.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")))   //관리자 권한 확인
-            throw new UserException(ErrorCode.HANDLE_ACCESS_DENIED);
+    public RsData<AdminOrderDetailResponse> getOrderDetail(@PathVariable("id") long id) {
 
         AdminOrderDetailResponse order = orderService.getOrderDetail(id);
 

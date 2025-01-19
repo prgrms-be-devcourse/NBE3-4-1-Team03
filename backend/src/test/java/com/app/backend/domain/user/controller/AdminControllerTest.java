@@ -112,14 +112,7 @@ class AdminControllerTest {
 
         //Then
         resultActions.andExpect(status().isForbidden())
-                     .andExpect(result -> {
-                         assertThat(result.getResolvedException() instanceof UserException).isTrue();
-                         final ErrorCode errorCode = ErrorCode.HANDLE_ACCESS_DENIED;
-                         assertThat(((UserException) result.getResolvedException()).getErrorCode())
-                                 .isEqualTo(errorCode);
-                         assertThat(result.getResolvedException().getMessage()).isEqualTo(errorCode.getMessage());
-                     })
-                     .andDo(print());
+                .andDo(print());
     }
 
     @Test
