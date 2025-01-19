@@ -7,14 +7,24 @@ import com.app.backend.domain.user.dto.request.UserInfoModifyRequest;
 import com.app.backend.domain.user.dto.request.UserSignupRequest;
 import com.app.backend.domain.user.dto.response.UserInfoResponse;
 import com.app.backend.domain.user.entity.User;
+import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.service.UserService;
+import com.app.backend.global.error.exception.ErrorCode;
 import com.app.backend.global.rq.Rq;
 import com.app.backend.global.rs.RsData;
+import com.app.backend.global.security.dto.LoginDto;
+import com.app.backend.global.security.user.CustomUserDetails;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.app.backend.global.error.exception.ErrorCode.*;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -33,7 +45,6 @@ public class ApiV1UserController {
 
     private final UserService  userService;
     private final OrderService orderService;
-    private final Rq           rq;
 
     @PostMapping("/signup")
     @Transactional
@@ -49,10 +60,19 @@ public class ApiV1UserController {
 
     @GetMapping("/users/{userId}")
     @Transactional(readOnly = true)
-    public RsData<UserInfoResponse> getUser(@PathVariable Long userId) {
+    public RsData<UserInfoResponse> getUser(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         User user = userService.getUserById(userId);
 
-        // TODO (rq로 회원인증 후 동작하도록 구현)
+        if (userDetails == null) {
+            throw new UserException(UNAUTHENTICATION_USER);
+        }
+
+        if (!Objects.equals(userId, userDetails.getUser().getId())) {
+            throw new UserException(UNAUTHORIZATION_USER);
+        }
 
         return new RsData<>(
                 true,
@@ -66,11 +86,18 @@ public class ApiV1UserController {
     @Transactional
     public RsData<Void> modifyUser(
             @PathVariable Long userId,
-            @Valid @RequestBody UserInfoModifyRequest req
+            @Valid @RequestBody UserInfoModifyRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         User user = userService.getUserById(userId);
 
-        // TODO (rq로 회원인증 후 동작하도록 구현)
+        if (userDetails == null) {
+            throw new UserException(UNAUTHENTICATION_USER);
+        }
+
+        if (!userId.equals(userDetails.getUser().getId())) {
+            throw new UserException(UNAUTHORIZATION_USER);
+        }
 
         userService.modifyInfo(user, req);
 
@@ -85,11 +112,18 @@ public class ApiV1UserController {
     @Transactional
     public RsData<Void> changePassword(
             @PathVariable Long userId,
-            @Valid @RequestBody UserChangePasswordRequest req
+            @Valid @RequestBody UserChangePasswordRequest req,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         User user = userService.getUserById(userId);
 
-        // TODO (rq로 회원인증 후 동작하도록 구현)
+        if (userDetails == null) {
+            throw new UserException(UNAUTHENTICATION_USER);
+        }
+
+        if (!userId.equals(userDetails.getUser().getId())) {
+            throw new UserException(UNAUTHORIZATION_USER);
+        }
 
         userService.changePassword(user, req);
 
@@ -102,10 +136,19 @@ public class ApiV1UserController {
 
     @DeleteMapping("/users/{userId}")
     @Transactional
-    public RsData<Void> deleteUser(@PathVariable Long userId) {
+    public RsData<Void> deleteUser(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         User user = userService.getUserById(userId);
 
-        // TODO (rq로 회원인증 후 동작하도록 구현)
+        if (userDetails == null) {
+            throw new UserException(UNAUTHENTICATION_USER);
+        }
+
+        if (!userId.equals(userDetails.getUser().getId())) {
+            throw new UserException(UNAUTHORIZATION_USER);
+        }
 
         userService.deleteUser(user);
 
@@ -117,11 +160,11 @@ public class ApiV1UserController {
     }
 
     @GetMapping("/users/orders")
-    public RsData<List<OrderResponse>> getOrdersByUser(@AuthenticationPrincipal UserDetails userDetails) {
-        //TODO: 스프링 시큐리티 인증 객체 활용
-//        long userId = ((CustomUserDetails) userDetails).getUser().getId();
-        long                userId = 1L;
+    public RsData<List<OrderResponse>> getOrdersByUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUser().getId();
+
         List<OrderResponse> orders = orderService.getOrdersByUserId(userId);
+
         return new RsData<>(true,
                             String.valueOf(HttpStatus.OK.value()),
                             "회원의 주문 정보를 성공적으로 조회했습니다.",

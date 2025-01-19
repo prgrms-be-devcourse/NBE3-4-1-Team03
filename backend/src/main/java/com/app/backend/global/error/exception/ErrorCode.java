@@ -22,6 +22,9 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, false, "U003", "잘못된 자격 증명"),
     PASSWORD_SAME_AS_CURRENT(HttpStatus.BAD_REQUEST, false, "U004", "새 비밀번호가 현재 비밀번호와 동일"),
     USER_DELETED(HttpStatus.BAD_REQUEST, false, "U005", "탈퇴한 회원"),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, false, "U006", "비밀번호 불일치"),
+    UNAUTHENTICATION_USER(HttpStatus.UNAUTHORIZED, false, "U007", "인증되지 않은 사용자"),
+    UNAUTHORIZATION_USER(HttpStatus.FORBIDDEN, false, "U008", "접근 권한이 없는 사용자"),
 
     //Product
     PRODUCT_DUPLICATION(HttpStatus.BAD_REQUEST, false, "P001", "이미 존재하는 제품"),
