@@ -49,4 +49,20 @@ public class AdminController {
                             OrderMessageConstant.ORDER_LIST_READ_SUCCESS,
                             allOrders);
     }
+
+    @GetMapping("/orders/{id}")
+    public RsData<AdminOrderDetailResponse> getOrderDetail(@AuthenticationPrincipal UserDetails userDetails,
+                                                         @PathVariable("id") long id) {
+        System.out.println("userDetails = " + userDetails);
+        if (!userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")))   //관리자 권한 확인
+            throw new UserException(ErrorCode.HANDLE_ACCESS_DENIED);
+
+        AdminOrderDetailResponse order = orderService.getOrderDetail(id);
+
+        return new RsData<>(true,
+                String.valueOf(HttpStatus.OK.value()),
+                OrderMessageConstant.ORDER_LIST_READ_SUCCESS,
+                order);
+    }
 }
