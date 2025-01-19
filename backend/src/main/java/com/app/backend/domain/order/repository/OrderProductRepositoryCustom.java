@@ -3,7 +3,7 @@ package com.app.backend.domain.order.repository;
 /**
  * PackageName : com.app.backend.domain.order.repository
  * FileName    : OrderProductRepositoryCustom
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */

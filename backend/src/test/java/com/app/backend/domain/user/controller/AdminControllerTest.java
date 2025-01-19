@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.ResultActions;
 /**
  * PackageName : com.app.backend.domain.user.controller
  * FileName    : AdminControllerTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 17.
  * Description :
  */

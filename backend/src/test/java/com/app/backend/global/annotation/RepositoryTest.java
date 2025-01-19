@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * PackageName : com.app.backend.global.annotation
  * FileName    : RepositoryTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */
