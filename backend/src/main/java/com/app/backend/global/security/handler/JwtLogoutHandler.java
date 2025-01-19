@@ -20,13 +20,18 @@ public class JwtLogoutHandler implements LogoutHandler {
         String authorization = request.getHeader("Authorization");
         String accessToken = null;
 
-        if (authorization != null) {
-            accessToken = authorization.substring(7);
-        }
+        String refreshToken = getRefreshToken(request);
 
-        if(!jwtUtil.isExpired(accessToken)) {
-            String username = jwtUtil.getUsername(accessToken);
-            redisRepository.delete(username);
+        if (authorization != null && refreshToken != null) {
+            accessToken = authorization.substring(7);
+            try {
+                String username = jwtUtil.getUsername(accessToken);
+                if (redisRepository.get(username).equals(refreshToken)) {
+                    redisRepository.delete(username);
+                }
+            } catch (Exception e) {
+                // 어떤 예외가 있어도 그냥 로그아웃 성공하게 수정
+            }
         }
 
         Cookie cookie = new Cookie("refreshToken", null);
@@ -34,5 +39,21 @@ public class JwtLogoutHandler implements LogoutHandler {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);
+    }
+
+    private String getRefreshToken(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+
+        String refreshToken = null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("refreshToken")) {
+                refreshToken = cookie.getValue();
+            }
+        }
+
+        return refreshToken;
     }
 }
