@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
 /**
  * PackageName : com.app.backend.domain.order.repository
  * FileName    : OrderProductRepositoryTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */
@@ -61,7 +61,7 @@ class OrderProductRepositoryTest {
 
     @ParameterizedTest
     @CsvSource({"6", "7", "8", "9", "10"})
-    @DisplayName("findById")
+    @DisplayName("findById, unknown order product id")
     void findById_unknownId(final long orderProductId) {
         //Given
 

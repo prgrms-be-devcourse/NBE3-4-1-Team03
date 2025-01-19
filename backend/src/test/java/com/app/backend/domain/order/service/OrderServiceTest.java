@@ -23,6 +23,7 @@ import com.app.backend.standard.util.Ut;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * PackageName : com.app.backend.domain.order.service
  * FileName    : OrderServiceTest
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 16.
  * Description :
  */
@@ -52,10 +52,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class OrderServiceTest {
 
+//    @RegisterExtension
+//    private static GreenMailExtension greenMailExtension = new GreenMailExtension(new ServerSetup(3025, null, "smtp"))
+//            .withConfiguration(GreenMailConfiguration.aConfig().withUser("greenmail", "greenmail"))
+//            .withPerMethodLifecycle(true);
+
     @Autowired
     private OrderService  orderService;
     @PersistenceContext
     private EntityManager em;
+//    @Autowired
+//    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private OrderRepository        orderRepository;
@@ -86,7 +93,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("saveOrder")
-    void saveOrder() {
+    void saveOrder() /*throws MessagingException, IOException*/ {
         //Given
         long       customerId = users.get(0).getId();
         List<Long> productIds = products.stream().map(Product::getId).toList();
@@ -99,11 +106,13 @@ class OrderServiceTest {
         OrderRequest orderRequest = new OrderRequest(productInfo);
 
         //When
-        orderService.saveOrder(customerId, orderRequest);
+        long savedOrderId = orderService.saveOrder(customerId, orderRequest);
 
         //Then
-        Order savedOrder = orderRepository.findAll().get(0);
+        Order savedOrder = orderRepository.findById(savedOrderId).get();
         User  customer   = users.get(0);
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+//        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
 
         assertThat(savedOrder).isNotNull();
         assertThat(savedOrder.getId()).isNotNull();
@@ -112,7 +121,9 @@ class OrderServiceTest {
         assertThat(savedOrder.getTotalPrice().compareTo(BigDecimal.valueOf(50000.00)) == 0).isTrue();
         assertThat(savedOrder.getAddress()).isEqualTo(
                 "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
-        assertThat(savedOrder.getStatus()).isEqualTo(OrderStatus.ORDERED);
+        assertThat(savedOrder.getStatus())
+                .isEqualTo(savedOrder.getCreatedDate().toLocalTime().isBefore(LocalTime.of(14, 0))
+                           ? OrderStatus.SHIPPED : OrderStatus.ORDERED);
 
         List<OrderProduct> savedOrderProducts = savedOrder.getOrderProducts()
                                                           .stream()
@@ -133,6 +144,12 @@ class OrderServiceTest {
             assertThat(savedOrderProduct.getTotalProductPrice())
                     .isEqualTo(storedProducts.get(i).getPrice().multiply(BigDecimal.ONE));
         }
+
+//        assertThat(receivedMessages).hasSize(1);
+//        assertThat(receivedMessages[0].getRecipients(Message.RecipientType.TO)[0].toString())
+//                .isEqualTo(customer.getEmail());
+//        assertThat(receivedMessages[0].getSubject())
+//                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_SUCCESS);
     }
 
     @Test
@@ -156,6 +173,10 @@ class OrderServiceTest {
                 .isInstanceOf(UserException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND)
                 .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
+
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
     }
 
     @Test
@@ -173,6 +194,10 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.saveOrder(userId, orderRequest))
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PRODUCT_NOT_FOUND)
                 .hasMessage(ErrorCode.PRODUCT_NOT_FOUND.getMessage());
+
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
     }
 
     @Test
@@ -180,7 +205,7 @@ class OrderServiceTest {
     void getOrderById() {
         //Given
         User               customer      = users.get(0);
-        Order              order         = createDummyOrder(customer, 1).get(0);
+        Order              order         = createDummyOrders(customer, 1).get(0);
         List<OrderProduct> orderProducts = createDummyOrderProducts(order);
 
         Long orderId = order.getId();
@@ -227,7 +252,7 @@ class OrderServiceTest {
     void getOrderByIdAndUserId() {
         //Given
         User               customer      = users.get(0);
-        Order              order         = createDummyOrder(customer, 1).get(0);
+        Order              order         = createDummyOrders(customer, 1).get(0);
         List<OrderProduct> orderProducts = createDummyOrderProducts(order);
 
         Long orderId = order.getId();
@@ -279,7 +304,7 @@ class OrderServiceTest {
     void getOrderByIdAndUserId_unknownUserId() {
         //Given
         User  customer = users.get(0);
-        Order order    = createDummyOrder(customer, 1).get(0);
+        Order order    = createDummyOrders(customer, 1).get(0);
 
         Long orderId       = order.getId();
         Long unknownUserId = 1234567890L;
@@ -319,7 +344,7 @@ class OrderServiceTest {
     void getOrderByOrderNumber() {
         //Given
         User               customer      = users.get(0);
-        Order              order         = createDummyOrder(customer, 1).get(0);
+        Order              order         = createDummyOrders(customer, 1).get(0);
         List<OrderProduct> orderProducts = createDummyOrderProducts(order);
 
         String orderNumber = order.getOrderNumber();
@@ -366,7 +391,7 @@ class OrderServiceTest {
     void getOrdersByUserId() {
         //Given
         User        customer = users.get(0);
-        List<Order> orders   = createDummyOrder(customer, 5);
+        List<Order> orders   = createDummyOrders(customer, 5);
         orders.forEach(this::createDummyOrderProducts);
 
         Long userId = customer.getId();
@@ -377,6 +402,16 @@ class OrderServiceTest {
 
         //Then
         assertThat(orderResponses).hasSize(5);
+        for (int i = 0; i < orders.size(); i++) {
+            assertThat(orderResponses.get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
+            assertThat(orderResponses.get(i).getName()).isEqualTo(orders.get(i).getCustomer().getName());
+            assertThat(orderResponses.get(i).getTotalAmount()).isEqualTo(orders.get(i).getTotalAmount());
+            assertThat(orderResponses.get(i).getTotalPrice().compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+            assertThat(orderResponses.get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
+            assertThat(orderResponses.get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
+            assertThat(orderResponses.get(i).getCreatedDate())
+                    .isEqualTo(Ut.Str.localDateTimeToString(orders.get(i).getCreatedDate()));
+        }
     }
 
     @Test
@@ -399,14 +434,14 @@ class OrderServiceTest {
     void getOrdersByUserIdAndStatus() {
         //Given
         User        customer = users.get(0);
-        List<Order> orders   = createDummyOrder(customer, 5);
+        List<Order> orders   = createDummyOrders(customer, 5);
         orders.forEach(this::createDummyOrderProducts);
 
         Long userId = customer.getId();
         afterEach();
 
         //When
-        List<OrderResponse> orderResponses = orderService.getOrdersByUserIdAndStatus(5, "ORDERED");
+        List<OrderResponse> orderResponses = orderService.getOrdersByUserIdAndStatus(userId, "ORDERED");
 
         //Then
         assertThat(orderResponses).hasSize(5);
@@ -447,34 +482,59 @@ class OrderServiceTest {
     @DisplayName("getAllOrders, List")
     void getAllOrders_typeList() {
         //Given
-        List<Order> createdOrders = createDummyOrder(users.get(0), 10);
+        List<Order> orders = createDummyOrders(users.get(0), 10);
+        afterEach();
 
         //When
-        List<OrderResponse> findOrders = orderService.getAllOrders();
+        List<OrderResponse> orderResponses = orderService.getAllOrders();
 
         //Then
-        assertThat(findOrders).hasSize(createdOrders.size());
+        assertThat(orderResponses).hasSize(orders.size());
+        for (int i = 0; i < orders.size(); i++) {
+            assertThat(orderResponses.get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
+            assertThat(orderResponses.get(i).getName()).isEqualTo(orders.get(i).getCustomer().getName());
+            assertThat(orderResponses.get(i).getTotalAmount()).isEqualTo(orders.get(i).getTotalAmount());
+            assertThat(orderResponses.get(i).getTotalPrice().compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+            assertThat(orderResponses.get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
+            assertThat(orderResponses.get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
+            assertThat(orderResponses.get(i).getCreatedDate())
+                    .isEqualTo(Ut.Str.localDateTimeToString(orders.get(i).getCreatedDate()));
+        }
     }
 
     @Test
     @DisplayName("getAllOrders, Page")
     void getAllOrders_typePage() {
         //Given
-        List<Order> createdOrders = createDummyOrder(users.get(0), 100);
-        Pageable    pageRequest   = PageRequest.of(0, 10);
+        List<Order> orders      = createDummyOrders(users.get(0), 100);
+        Pageable    pageRequest = PageRequest.of(0, 10);
+        afterEach();
 
         //When
-        Page<OrderResponse> findOrders = orderService.getAllOrders(pageRequest);
+        List<OrderResponse> orderResponses = orderService.getAllOrders(pageRequest).getContent();
 
         //Then
-        assertThat(findOrders.getContent()).hasSize(pageRequest.getPageSize());
+        orders = orders.subList(0, 10);
+
+        assertThat(orderResponses).hasSizeLessThanOrEqualTo(pageRequest.getPageSize());
+        for (int i = 0; i < orders.size(); i++) {
+            assertThat(orderResponses.get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
+            assertThat(orderResponses.get(i).getName()).isEqualTo(orders.get(i).getCustomer().getName());
+            assertThat(orderResponses.get(i).getTotalAmount()).isEqualTo(orders.get(i).getTotalAmount());
+            assertThat(orderResponses.get(i).getTotalPrice()
+                                     .compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+            assertThat(orderResponses.get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
+            assertThat(orderResponses.get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
+            assertThat(orderResponses.get(i).getCreatedDate())
+                    .isEqualTo(Ut.Str.localDateTimeToString(orders.get(i).getCreatedDate()));
+        }
     }
 
     @Test
     @DisplayName("existsByOrderNumber, exists order number")
     void existByOrderNumber() {
         //Given
-        String orderNumber = createDummyOrder(users.get(0), 1).get(0).getOrderNumber();
+        String orderNumber = createDummyOrders(users.get(0), 1).get(0).getOrderNumber();
 
         //When
         boolean flag = orderService.existsByOrderNumber(orderNumber);
@@ -500,7 +560,7 @@ class OrderServiceTest {
     @DisplayName("updateOrderStatus, order id and order status")
     void updateOrderStatus_paramOrderIdAndOrderStatus() {
         //Given
-        Order  order             = createDummyOrder(users.get(0), 1).get(0);
+        Order  order             = createDummyOrders(users.get(0), 1).get(0);
         long   orderId           = order.getId();
         String beforeOrderStatus = order.getStatus().name();
         afterEach();
@@ -534,7 +594,7 @@ class OrderServiceTest {
     @DisplayName("updateOrderStatus, unknown order status")
     void updateOrderStatus_paramOrderIdAndOrderStatus_unknownOrderStatus() {
         //Given
-        Order order   = createDummyOrder(users.get(0), 1).get(0);
+        Order order   = createDummyOrders(users.get(0), 1).get(0);
         long  orderId = order.getId();
         afterEach();
 
@@ -551,7 +611,7 @@ class OrderServiceTest {
     @DisplayName("updateOrderStatus, order number and order status")
     void updateOrderStatus_paramOrderNumberAndOrderStatus() {
         //Given
-        Order  order             = createDummyOrder(users.get(0), 1).get(0);
+        Order  order             = createDummyOrders(users.get(0), 1).get(0);
         String orderNumber       = order.getOrderNumber();
         String beforeOrderStatus = order.getStatus().name();
         afterEach();
@@ -585,7 +645,7 @@ class OrderServiceTest {
     @DisplayName("updateOrderStatus, unknown order status")
     void updateOrderStatus_paramOrderNumberAndOrderStatus_unknownOrderStatus() {
         //Given
-        Order  order       = createDummyOrder(users.get(0), 1).get(0);
+        Order  order       = createDummyOrders(users.get(0), 1).get(0);
         String orderNumber = order.getOrderNumber();
         afterEach();
 
@@ -597,10 +657,62 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("updateOrderStatusByUserId")
+    void updateOrderStatusByUserId() {
+        //Given
+        Order  order             = createDummyOrders(users.get(0), 1).get(0);
+        Long   orderId           = order.getId();
+        Long   userId            = order.getCustomer().getId();
+        String beforeOrderStatus = order.getStatus().name();
+        afterEach();
+
+        //When
+        orderService.updateOrderStatusByUserId(orderId, userId, "SHIPPED");
+
+        //Then
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+
+        Order updatedOrder = orderRepository.findById(orderId).get();
+
+        assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
+        assertThat(updatedOrder.getStatus().name()).isEqualTo("SHIPPED");
+
+//        assertThat(greenMailExtension.getReceivedMessages()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("updateOrderStatusByUserId, order cancelled")
+    void updateOrderStatusByUserId_orderCancelled() /*throws MessagingException*/ {
+        //Given
+        Order  order             = createDummyOrders(users.get(0), 1).get(0);
+        Long   orderId           = order.getId();
+        Long   userId            = order.getCustomer().getId();
+        String beforeOrderStatus = order.getStatus().name();
+        afterEach();
+
+        //When
+        orderService.updateOrderStatusByUserId(orderId, userId, "CANCELLED");
+
+        //Then
+//        greenMailExtension.waitForIncomingEmail(5000, 1);
+
+        Order updatedOrder = orderRepository.findById(orderId).get();
+
+        assertThat(updatedOrder.getStatus().name()).isNotEqualTo(beforeOrderStatus);
+        assertThat(updatedOrder.getStatus().name()).isEqualTo("CANCELLED");
+
+//        MimeMessage[] receivedMessages = greenMailExtension.getReceivedMessages();
+
+//        assertThat(receivedMessages).hasSize(1);
+//        assertThat(receivedMessages[0].getSubject())
+//                .isEqualTo(MailMessageConstant.MAIL_SUBJECT_ORDER_CANCEL);
+    }
+
+    @Test
     @DisplayName("deleteOrderById")
     void deleteOrderById() {
         //Given
-        Order              order           = createDummyOrder(users.get(0), 1).get(0);
+        Order              order           = createDummyOrders(users.get(0), 1).get(0);
         List<OrderProduct> orderProducts   = createDummyOrderProducts(order);
         long               orderId         = order.getId();
         List<Long>         orderProductIds = orderProducts.stream().map(OrderProduct::getId).toList();
@@ -636,7 +748,7 @@ class OrderServiceTest {
     @DisplayName("deleteOrderByOrderNumber")
     void deleteOrderByOrderNumber() {
         //Given
-        Order              order           = createDummyOrder(users.get(0), 1).get(0);
+        Order              order           = createDummyOrders(users.get(0), 1).get(0);
         List<OrderProduct> orderProducts   = createDummyOrderProducts(order);
         Long               orderId         = order.getId();
         List<Long>         orderProductIds = orderProducts.stream().map(OrderProduct::getId).toList();
@@ -670,7 +782,7 @@ class OrderServiceTest {
 
     //==================== 내부 메서드 ====================//
 
-    private List<Order> createDummyOrder(final User customer, final int size) {
+    private List<Order> createDummyOrders(final User customer, final int size) {
         return initDummyData.createDummyOrders(orderRepository, size, customer);
     }
 

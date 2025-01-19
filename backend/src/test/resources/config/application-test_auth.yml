@@ -1,15 +1,15 @@
-#spring:
-#  mail:
-#    host: localhost
-#    port: 3025
-#    username: greenmail
-#    password:
-#    properties:
-#      mail:
-#        smtp:
-#          starttls:
-#            enable: false
-#            required: false
+spring:
+  mail:
+    host: localhost
+    port: 3025
+    username: greenmail
+    password: greenmail
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: false
+            required: false
 
 #JWT config
 jwt:

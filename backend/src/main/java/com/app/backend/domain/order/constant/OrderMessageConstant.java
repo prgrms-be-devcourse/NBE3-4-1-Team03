@@ -3,7 +3,7 @@ package com.app.backend.domain.order.constant;
 /**
  * PackageName : com.app.backend.domain.order.constant
  * FileName    : OrderMessageConstant
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 16.
  * Description :
  */

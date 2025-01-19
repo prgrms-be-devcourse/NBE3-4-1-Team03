@@ -38,10 +38,11 @@ dependencies {
     //JJWT :: API
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
 
-    runtimeOnly ("io.jsonwebtoken:jjwt-impl:0.12.6")
-    runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.12.6")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
 
@@ -55,6 +56,8 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+//    //== GreenMail Junit5 ==
+//    testImplementation("com.icegreen:greenmail-junit5:1.6.15")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
