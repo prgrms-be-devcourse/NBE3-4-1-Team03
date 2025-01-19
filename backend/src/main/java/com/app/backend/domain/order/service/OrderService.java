@@ -24,31 +24,31 @@ import com.app.backend.global.util.MailUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepository        orderRepository;
-    private final OrderProductRepository orderProductRepository;
-    private final ProductRepository      productRepository;
-    private final UserRepository         userRepository;
-    private final MailUtil               mailUtil;
-    private final TaskScheduler          taskScheduler;
+    private final OrderRepository            orderRepository;
+    private final OrderProductRepository     orderProductRepository;
+    private final ProductRepository          productRepository;
+    private final UserRepository             userRepository;
+    private final MailUtil                   mailUtil;
+    private final PlatformTransactionManager transactionManager;
 
     /**
      * 주문 저장
@@ -113,14 +113,7 @@ public class OrderService {
                                     .build();
         String text = OrderUtil.getOrderCompleteMailText(mailInfo); //주문 완료 메일 본문 생성
 
-        if (!isShipped) {   //14시 이후에 주문된 경우
-            LocalDateTime scheduledTime       = orderTime.plusDays(1).withHour(9).withMinute(0).withSecond(0);
-            String        deliveryUpdatedText = OrderUtil.getDeliveryStatusUpdateMailText(order.getOrderNumber());
-
-            scheduledUpdateOrderStatus(order.getId(), OrderStatus.SHIPPED, scheduledTime); //배송 상태 업데이트
-            mailUtil.sendMailAtScheduledTime(user.getEmail(), MailMessageConstant.MAIL_SUBJECT_ORDER_UPDATE,
-                                             deliveryUpdatedText, scheduledTime); //배송 상태 업데이트 메일 예약 등록
-        } else
+        if (isShipped)    //14시 이전에 주문된 경우
             order.updateOrderStatus(OrderStatus.SHIPPED);   //14시 이전 주문은 즉시 발송
 
         mailUtil.sendMail(user.getEmail(), MailMessageConstant.MAIL_SUBJECT_ORDER_SUCCESS, text);   //주문 완료 메일 전송
@@ -289,21 +282,27 @@ public class OrderService {
 
     /**
      * 주문 상태 변경 예약
-     *
-     * @param orderId       - 주문 ID
-     * @param orderStatus   - 주문 상태
-     * @param scheduledTime - 예약 시간
+     * 매일 오전 9시 기준 주문 상태인 주문 내역 -> 배송 상태로 변경
      */
     @Transactional
-    public void scheduledUpdateOrderStatus(final long orderId, final OrderStatus orderStatus,
-                                           final LocalDateTime scheduledTime) {
-        taskScheduler.schedule(() -> {
-            Order order = orderRepository.findById(orderId)
-                                         .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+    @Scheduled(cron = "0 0 9 * * ?")
+//    @Scheduled(fixedRate = 3000)  //NOTE: 테스트 시 사용
+    public void scheduledUpdateOrderStatus() {
+        List<Order> orders = orderRepository.findAllByStatusAndCreatedDateLessThanEqual(
+                OrderStatus.ORDERED, LocalDateTime.now().withHour(9)
+        );
 
-            order.updateOrderStatus(orderStatus);
-
-        }, Date.from(scheduledTime.atZone(ZoneId.systemDefault()).toInstant()));
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.execute(status -> {
+            for (Order order : orders) {
+                order.updateOrderStatus(OrderStatus.SHIPPED);
+                mailUtil.sendMail(order.getCustomer().getEmail(),
+                                  MailMessageConstant.MAIL_SUBJECT_ORDER_UPDATE,
+                                  OrderUtil.getDeliveryStatusUpdateMailText(order.getOrderNumber()));
+                orderRepository.save(order);
+            }
+            return null;
+        });
     }
 
     /**
@@ -354,7 +353,8 @@ public class OrderService {
      */
     private Map<Long, Integer> getProductAmountMap(final List<OrderProductRequest> productInfo) {
         return productInfo.stream()
-                          .collect(Collectors.toMap(OrderProductRequest::getProductId, OrderProductRequest::getAmount));
+                          .collect(Collectors.toMap(OrderProductRequest::getProductId,
+                                                    OrderProductRequest::getAmount));
     }
 
     /**
