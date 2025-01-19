@@ -1,6 +1,8 @@
 package com.app.backend.domain.user.controller;
 
 import com.app.backend.domain.order.constant.OrderMessageConstant;
+import com.app.backend.domain.order.dto.response.AdminOrderDetailResponse;
+import com.app.backend.domain.order.dto.response.AdminOrderResponse;
 import com.app.backend.domain.order.dto.response.OrderResponse;
 import com.app.backend.domain.order.service.OrderService;
 import com.app.backend.domain.user.exception.UserException;
@@ -13,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,18 +36,17 @@ public class AdminController {
     private final OrderService orderService;
 
     @GetMapping("/orders")
-    public RsData<List<OrderResponse>> getAllOrders(@AuthenticationPrincipal UserDetails userDetails) {
+    public RsData<List<AdminOrderResponse>> getAllOrders(@AuthenticationPrincipal UserDetails userDetails) {
         System.out.println("userDetails = " + userDetails);
         if (!userDetails.getAuthorities().stream()
                         .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")))   //관리자 권한 확인
             throw new UserException(ErrorCode.HANDLE_ACCESS_DENIED);
 
-        List<OrderResponse> allOrders = orderService.getAllOrders();
+        List<AdminOrderResponse> allOrders = orderService.getAllOrders();
 
         return new RsData<>(true,
                             String.valueOf(HttpStatus.OK.value()),
                             OrderMessageConstant.ORDER_LIST_READ_SUCCESS,
                             allOrders);
     }
-
 }
