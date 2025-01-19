@@ -2,6 +2,7 @@ package com.app.backend.domain.order.service;
 
 import com.app.backend.domain.order.dto.request.OrderProductRequest;
 import com.app.backend.domain.order.dto.request.OrderRequest;
+import com.app.backend.domain.order.dto.response.OrderProductResponse;
 import com.app.backend.domain.order.dto.response.OrderResponse;
 import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.entity.OrderProduct;
@@ -10,22 +11,30 @@ import com.app.backend.domain.order.exception.OrderException;
 import com.app.backend.domain.order.repository.OrderProductRepository;
 import com.app.backend.domain.order.repository.OrderRepository;
 import com.app.backend.domain.order.util.OrderUtil;
+import com.app.backend.domain.order.util.OrderUtil.MailInfo;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.exception.ProductException;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.domain.user.entity.User;
 import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.domain.user.repository.UserRepository;
+import com.app.backend.global.constant.MailMessageConstant;
 import com.app.backend.global.error.exception.ErrorCode;
+import com.app.backend.global.util.MailUtil;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +47,8 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final ProductRepository      productRepository;
     private final UserRepository         userRepository;
+    private final MailUtil               mailUtil;
+    private final TaskScheduler          taskScheduler;
 
     /**
      * 주문 저장
@@ -87,6 +98,32 @@ public class OrderService {
             //TODO: 재고가 주문 수량보다 작다면? -> throw new ProductException(ErrorCode.PRODUCT_OUT_OF_STOCK);
         }
         orderProductRepository.saveAll(orderProducts);  //주문 제품(OrderProduct) 엔티티 저장
+
+        //주문 완료 메일 전송
+        LocalTime     cutOffTime = LocalTime.of(14, 0);
+        LocalDateTime orderTime  = order.getCreatedDate();
+        boolean       isShipped  = orderTime.toLocalTime().isBefore(cutOffTime);   //주문한 시간과 해당 일 14시 비교
+
+        MailInfo mailInfo = MailInfo.builder()
+                                    .isShipped(isShipped)
+                                    .name(order.getCustomer().getName())
+                                    .address(order.getCustomer().getAddress())
+                                    .orderNumber(order.getOrderNumber())
+                                    .orderProducts(orderProducts.stream().map(OrderProductResponse::of).toList())
+                                    .build();
+        String text = OrderUtil.getOrderCompleteMailText(mailInfo); //주문 완료 메일 본문 생성
+
+        if (!isShipped) {   //14시 이후에 주문된 경우
+            LocalDateTime scheduledTime       = orderTime.plusDays(1).withHour(9).withMinute(0).withSecond(0);
+            String        deliveryUpdatedText = OrderUtil.getDeliveryStatusUpdateMailText(order.getOrderNumber());
+
+            scheduledUpdateOrderStatus(order.getId(), OrderStatus.SHIPPED, scheduledTime); //배송 상태 업데이트
+            mailUtil.sendMailAtScheduledTime(user.getEmail(), MailMessageConstant.MAIL_SUBJECT_ORDER_UPDATE,
+                                             deliveryUpdatedText, scheduledTime); //배송 상태 업데이트 메일 예약 등록
+        } else
+            order.updateOrderStatus(OrderStatus.SHIPPED);   //14시 이전 주문은 즉시 발송
+
+        mailUtil.sendMail(user.getEmail(), MailMessageConstant.MAIL_SUBJECT_ORDER_SUCCESS, text);   //주문 완료 메일 전송
 
         return order.getId();
     }
@@ -226,6 +263,11 @@ public class OrderService {
 
             order.updateOrderStatus(OrderStatus.valueOf(orderStatus));
 
+            if ("CANCELLED".equals(orderStatus))    //주문 취소 시 취소 성공 메일 전송
+                mailUtil.sendMail(order.getCustomer().getEmail(),
+                                  MailMessageConstant.MAIL_SUBJECT_ORDER_CANCEL,
+                                  OrderUtil.getOrderCancelMailText(order.getOrderNumber()));
+
             return;
         }
 
@@ -243,6 +285,25 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                                      .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
         order.updateOrderStatus(OrderStatus.valueOf(orderStatus));
+    }
+
+    /**
+     * 주문 상태 변경 예약
+     *
+     * @param orderId       - 주문 ID
+     * @param orderStatus   - 주문 상태
+     * @param scheduledTime - 예약 시간
+     */
+    @Transactional
+    public void scheduledUpdateOrderStatus(final long orderId, final OrderStatus orderStatus,
+                                           final LocalDateTime scheduledTime) {
+        taskScheduler.schedule(() -> {
+            Order order = orderRepository.findById(orderId)
+                                         .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+            order.updateOrderStatus(orderStatus);
+
+        }, Date.from(scheduledTime.atZone(ZoneId.systemDefault()).toInstant()));
     }
 
     /**
