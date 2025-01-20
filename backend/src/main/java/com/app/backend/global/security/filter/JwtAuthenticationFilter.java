@@ -1,5 +1,6 @@
 package com.app.backend.global.security.filter;
 
+import com.app.backend.domain.user.exception.UserException;
 import com.app.backend.global.security.dto.LoginDto;
 import com.app.backend.global.security.util.JwtUtil;
 import com.app.backend.global.security.user.CustomUserDetails;
@@ -10,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -19,7 +22,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.app.backend.global.error.exception.ErrorCode.INVALID_INPUT_VALUE;
 
 // setFilterProcessesUrl("/api/login") 요청 url
 @RequiredArgsConstructor
@@ -36,6 +43,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
             LoginDto.LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginDto.LoginRequest.class);
+
+            validateDto(response,loginRequest);
 
             String username = loginRequest.getEmail();
             String password = loginRequest.getPassword();
@@ -78,5 +87,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 HttpServletResponse.SC_OK,
                 new RsData<>(true, "200", "로그인 성공", new LoginDto.LoginResponse(userDetails.getUsername())),
                 objectMapper);
+    }
+
+    private void validateDto(HttpServletResponse response, LoginDto.LoginRequest loginRequest)throws IOException {
+        Set<ConstraintViolation<LoginDto.LoginRequest>> violations = Validation.buildDefaultValidatorFactory().getValidator().validate(loginRequest);
+
+        if(!violations.isEmpty()) {
+//            String errorMessage = violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", ")); // dto 에 설정된 메세지 사용시 해제
+            throw new UserException(INVALID_INPUT_VALUE);
+        }
     }
 }
