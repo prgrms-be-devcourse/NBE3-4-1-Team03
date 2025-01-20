@@ -2,11 +2,13 @@ package com.app.backend.domain.order.service;
 
 import com.app.backend.domain.order.dto.request.OrderProductRequest;
 import com.app.backend.domain.order.dto.request.OrderRequest;
-import com.app.backend.domain.order.dto.response.OrderProductResponse;
+import com.app.backend.domain.order.dto.response.AdminOrderDetailResponse;
+import com.app.backend.domain.order.dto.response.AdminOrderResponse;
 import com.app.backend.domain.order.dto.response.OrderResponse;
 import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.entity.OrderProduct;
 import com.app.backend.domain.order.entity.OrderStatus;
+import com.app.backend.domain.order.entity.Payment;
 import com.app.backend.domain.order.exception.OrderException;
 import com.app.backend.domain.order.repository.OrderProductRepository;
 import com.app.backend.domain.order.repository.OrderRepository;
@@ -196,11 +198,11 @@ public class OrderService {
     /**
      * 모든 주문 정보 조회(List)
      *
-     * @return 주문 정보 응답(OrderResponse) 목록
+     * @return 주문 정보 응답(AdminOrderResponse) 목록
      */
-    public List<OrderResponse> getAllOrders() {
+    public List<AdminOrderResponse> getAllOrders() {
         //NOTE: 관리자 권한 계정 대상
-        return orderRepository.findAll().stream().map(OrderResponse::of).toList();
+        return orderRepository.findAll().stream().map(AdminOrderResponse::of).toList();
     }
 
     /**
@@ -209,10 +211,26 @@ public class OrderService {
      * @param pageable - 페이징 객체
      * @return 주문 정보 응답(OrderResponse) 페이징 객체
      */
-    public Page<OrderResponse> getAllOrders(final Pageable pageable) {
-        return orderRepository.findAll(pageable).map(OrderResponse::of);
+    public Page<AdminOrderResponse> getAllOrders(final Pageable pageable) {
+        return orderRepository.findAll(pageable).map(AdminOrderResponse::of);
     }
 
+    /**
+     * 주문 정보 단건 상세 조회
+     *
+     * @param orderId - 주문 ID
+     * @return 관리자 주문 상세 정보 응답(AdminOrderDetailResponse) 객체
+     */
+    public AdminOrderDetailResponse getOrderDetail(long orderId) {
+        //NOTE: 관리자 권한 계정 대상
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        //TODO: payment 값 필요.
+        Payment payment = null;
+
+        return AdminOrderDetailResponse.of(order, payment);
+    }
     /**
      * 주문 번호 검증
      *
@@ -400,5 +418,4 @@ public class OrderService {
             return true;
         throw new OrderException(ErrorCode.INVALID_ORDER_STATUS);
     }
-
 }

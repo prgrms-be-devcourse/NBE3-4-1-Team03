@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.app.backend.domain.order.dto.request.OrderProductRequest;
 import com.app.backend.domain.order.dto.request.OrderRequest;
+import com.app.backend.domain.order.dto.response.AdminOrderResponse;
 import com.app.backend.domain.order.dto.response.OrderResponse;
 import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.entity.OrderProduct;
@@ -486,7 +487,7 @@ class OrderServiceTest {
         afterEach();
 
         //When
-        List<OrderResponse> orderResponses = orderService.getAllOrders();
+        List<AdminOrderResponse> findOrders = orderService.getAllOrders();
 
         //Then
         assertThat(orderResponses).hasSize(orders.size());
@@ -511,7 +512,7 @@ class OrderServiceTest {
         afterEach();
 
         //When
-        List<OrderResponse> orderResponses = orderService.getAllOrders(pageRequest).getContent();
+        Page<AdminOrderResponse> findOrders = orderService.getAllOrders(pageRequest);
 
         //Then
         orders = orders.subList(0, 10);

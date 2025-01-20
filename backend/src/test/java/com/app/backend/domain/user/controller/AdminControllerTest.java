@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.app.backend.domain.order.constant.OrderMessageConstant;
-import com.app.backend.domain.order.dto.response.OrderResponse;
+import com.app.backend.domain.order.dto.response.AdminOrderResponse;
 import com.app.backend.domain.order.entity.Order;
 import com.app.backend.domain.order.service.OrderService;
 import com.app.backend.domain.user.entity.User;
@@ -53,7 +53,7 @@ class AdminControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private OrderResponse orderResponse;
+    private AdminOrderResponse orderResponse;
 
     @BeforeEach
     void beforeEach() {
@@ -72,7 +72,7 @@ class AdminControllerTest {
                                "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
         ReflectionUtil.setPrivateFieldValue(Order.class, order, "createdDate", LocalDateTime.now());
 
-        orderResponse = OrderResponse.of(order);
+        orderResponse = AdminOrderResponse.of(order);
 
         when(orderService.getAllOrders()).thenReturn(List.of(orderResponse));
     }
@@ -112,14 +112,7 @@ class AdminControllerTest {
 
         //Then
         resultActions.andExpect(status().isForbidden())
-                     .andExpect(result -> {
-                         assertThat(result.getResolvedException() instanceof UserException).isTrue();
-                         final ErrorCode errorCode = ErrorCode.HANDLE_ACCESS_DENIED;
-                         assertThat(((UserException) result.getResolvedException()).getErrorCode())
-                                 .isEqualTo(errorCode);
-                         assertThat(result.getResolvedException().getMessage()).isEqualTo(errorCode.getMessage());
-                     })
-                     .andDo(print());
+                .andDo(print());
     }
 
     @Test
