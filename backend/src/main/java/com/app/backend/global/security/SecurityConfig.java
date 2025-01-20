@@ -105,8 +105,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://cdpn.io",
                 AppConfig.getSiteFrontUrl(),
-                "https://localhost:5173",
-                "https://localhost:4173"
+                "http://localhost:5173",
+                "http://localhost:4173"
         ));
         // 허용할 HTTP 메서드 설정
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
