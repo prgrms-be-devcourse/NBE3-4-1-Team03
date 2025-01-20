@@ -14,4 +14,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     Page<Product> findByOrderByNameDesc(Pageable pageable);
 
     Page<Product> findByNameContaining(String keyword, Pageable pageable);
+
+    Boolean existsByName(String name);
+
+    Boolean existsByNameAndIdNot(String name, Long id);
 }
