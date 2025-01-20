@@ -37,6 +37,10 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    public Date getExpirationDate(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration();
+    }
+
     public String createAccessToken(CustomUserDetails customUserDetails, long expiration) {
         long currentTime = System.currentTimeMillis();
 
