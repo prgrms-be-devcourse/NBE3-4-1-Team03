@@ -124,7 +124,10 @@ class OrderServiceTest {
         assertThat(savedOrder.getAddress()).isEqualTo(
                 "%s %s".formatted(customer.getAddress(), customer.getDetailAddress()));
         assertThat(savedOrder.getStatus())
-                .isEqualTo(savedOrder.getCreatedDate().toLocalTime().isBefore(LocalTime.of(14, 0))
+                .isEqualTo(savedOrder.getCreatedDate().toLocalTime()
+                                     .isAfter(LocalTime.of(9, 0))
+                           && savedOrder.getCreatedDate().toLocalTime()
+                                        .isBefore(LocalTime.of(14, 0))
                            ? OrderStatus.SHIPPED : OrderStatus.ORDERED);
 
         List<OrderProduct> savedOrderProducts = savedOrder.getOrderProducts()
@@ -522,7 +525,7 @@ class OrderServiceTest {
             assertThat(findOrders.getContent().get(i).getOrderNumber()).isEqualTo(orders.get(i).getOrderNumber());
             assertThat(findOrders.getContent().get(i).getUserName()).isEqualTo(orders.get(i).getCustomer().getName());
             assertThat(findOrders.getContent().get(i).getTotalPrice()
-                    .compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
+                                 .compareTo(orders.get(i).getTotalPrice()) == 0).isTrue();
             assertThat(findOrders.getContent().get(i).getOrderAddress()).isEqualTo(orders.get(i).getAddress());
             assertThat(findOrders.getContent().get(i).getOrderStatus()).isEqualTo(orders.get(i).getStatus().name());
             assertThat(findOrders.getContent().get(i).getCreatedDate())

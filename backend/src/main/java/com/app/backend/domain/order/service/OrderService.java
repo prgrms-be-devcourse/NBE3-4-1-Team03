@@ -103,9 +103,9 @@ public class OrderService {
         orderProductRepository.saveAll(orderProducts);  //주문 제품(OrderProduct) 엔티티 저장
 
         //주문 완료 메일 전송
-        LocalTime     cutOffTime = LocalTime.of(14, 0);
-        LocalDateTime orderTime  = order.getCreatedDate();
-        boolean       isShipped  = orderTime.toLocalTime().isBefore(cutOffTime);   //주문한 시간과 해당 일 14시 비교
+        LocalDateTime orderTime = order.getCreatedDate();
+        boolean isShipped = orderTime.toLocalTime().isBefore(LocalTime.of(14, 0))
+                            && orderTime.toLocalTime().isAfter(LocalTime.of(9, 0));   //주문한 시간과 해당 일 오전 9시 ~ 오후 14시 비교
 
         MailInfo mailInfo = MailInfo.builder()
                                     .isShipped(isShipped)
@@ -116,7 +116,7 @@ public class OrderService {
                                     .build();
         String text = OrderUtil.getOrderCompleteMailText(mailInfo); //주문 완료 메일 본문 생성
 
-        if (isShipped)    //14시 이전에 주문된 경우
+        if (isShipped)    //9시 ~ 14시에 주문된 경우
             order.updateOrderStatus(OrderStatus.SHIPPED);   //14시 이전 주문은 즉시 발송
 
         mailUtil.sendMail(user.getEmail(), MailMessageConstant.MAIL_SUBJECT_ORDER_SUCCESS, text);   //주문 완료 메일 전송
@@ -225,13 +225,14 @@ public class OrderService {
     public AdminOrderDetailResponse getOrderDetail(long orderId) {
         //NOTE: 관리자 권한 계정 대상
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+                                     .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
 
         //TODO: payment 값 필요.
         Payment payment = null;
 
         return AdminOrderDetailResponse.of(order, payment);
     }
+
     /**
      * 주문 번호 검증
      *
