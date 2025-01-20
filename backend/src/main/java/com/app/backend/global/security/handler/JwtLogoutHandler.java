@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 @RequiredArgsConstructor
 public class JwtLogoutHandler implements LogoutHandler {
 
@@ -26,6 +29,9 @@ public class JwtLogoutHandler implements LogoutHandler {
             accessToken = authorization.substring(7);
             try {
                 String username = jwtUtil.getUsername(accessToken);
+                Date expiration = jwtUtil.getExpirationDate(accessToken);
+                long duration = expiration.getTime() - System.currentTimeMillis();
+                redisRepository.save(accessToken,"Logout", duration, TimeUnit.MILLISECONDS);
                 if (redisRepository.get(username).equals(refreshToken)) {
                     redisRepository.delete(username);
                 }
