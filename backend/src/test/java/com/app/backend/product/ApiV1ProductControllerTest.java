@@ -1,10 +1,22 @@
 package com.app.backend.product;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.app.backend.domain.product.controller.ApiV1ProductController;
 import com.app.backend.domain.product.entity.Product;
 import com.app.backend.domain.product.repository.ProductRepository;
 import com.app.backend.domain.product.service.ProductService;
 import com.app.backend.global.annotation.CustomWithMockAdmin;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,15 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -42,10 +45,12 @@ public class ApiV1ProductControllerTest {
     private ProductRepository productRepository;
 
     @BeforeAll
-    public static void setProducts(ApplicationContext applicationContext){
+    public static void setProducts(ApplicationContext applicationContext)
+            throws InterruptedException {
         ProductRepository productRepository = applicationContext.getBean(ProductRepository.class);
         if(productRepository.count()>0) return;
         for(int i=0;i<10;i++){
+            Thread.sleep(1);
             productRepository.save(
                     Product.builder()
                             .name("상품 %d".formatted(i+1))
