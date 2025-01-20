@@ -48,6 +48,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String accessToken = authorization.substring(7);
 
+        if(redisRepository.get(accessToken) != null){
+            AuthResponseUtil.failLogin(
+                    response,
+                    new RsData<>(false, "400", "로그아웃 처리된 AccessToken 입니다"),
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    objectMapper);
+            return;
+        }
+
         try {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
@@ -91,6 +100,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
+        Long id = jwtUtil.getUserId(refreshToken);
         String username = jwtUtil.getUsername(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
@@ -104,7 +114,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        CustomUserDetails userDetails = new CustomUserDetails(User.builder().email(username).role(role).build());
+        CustomUserDetails userDetails = new CustomUserDetails(User.builder().id(id).email(username).role(role).build());
 
         String newAccessToken = jwtUtil.createAccessToken(userDetails, ACCESS_EXPIRATION);
         String newRefreshToken = jwtUtil.createRefreshToken(userDetails, REFRESH_EXPIRATION);
