@@ -1,7 +1,7 @@
-#spring:
-#  mail:
-#    host: localhost
-#    port: 25
+spring:
+  mail:
+    host: localhost
+    port: 25
 
 #JWT config
 jwt:

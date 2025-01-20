@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * PackageName : com.app.backend.domain.user.controller
  * FileName    : AdminController
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 17.
  * Description :
  */

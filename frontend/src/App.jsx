@@ -4,6 +4,9 @@ import Signup from "./pages/Signup";
 import Main from "./pages/Main";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import Admin from "./pages/Admin";
+import NotFound404 from "./pages/NotFound404";
+import NewProduct from "./pages/NewProduct";
 
 import ProtectedRoute from "./pages/PrivateRoute";
 
@@ -28,7 +31,15 @@ function App() {
             path="/admin"
             element={
               <ProtectedRoute>
-                <div>관리자 컴포넌트</div>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/newProduct"
+            element={
+              <ProtectedRoute>
+                <NewProduct />
               </ProtectedRoute>
             }
           />
@@ -48,6 +59,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/*" element={<NotFound404 />} />
         </Routes>
       </Layout>
     </>

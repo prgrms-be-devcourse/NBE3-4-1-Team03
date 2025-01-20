@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * PackageName : com.app.backend.domain.order.dto.response
  * FileName    : OrderProductResponse
- * Author      : 강찬우
+ * Author      : loadingKKamo21
  * Date        : 25. 1. 15.
  * Description :
  */
