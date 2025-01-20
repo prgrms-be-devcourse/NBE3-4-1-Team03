@@ -64,6 +64,11 @@ public class ProductService {
     }
 
     public Product add(ApiV1ProductController.AddProductReqBody addProductReqBody) {
+
+        if (productRepository.existsByName(addProductReqBody.name())) {
+            throw new ProductException(ErrorCode.PRODUCT_DUPLICATION);
+        }
+
         Product product = Product
                 .builder()
                 .name(addProductReqBody.name())
@@ -72,6 +77,7 @@ public class ProductService {
                 .stock(addProductReqBody.amount())
                 .status(addProductReqBody.status())
                 .build();
+
         return this.productRepository.save(product);
     }
 
@@ -81,6 +87,11 @@ public class ProductService {
     }
 
     public void modify(Product product, ApiV1ProductController.ModifyProductReqBody modifyProductReqBody) {
+
+        if (productRepository.existsByNameAndIdNot(modifyProductReqBody.name(), product.getId())) {
+            throw new ProductException(ErrorCode.PRODUCT_DUPLICATION);
+        }
+
         if (modifyProductReqBody.name() != null) {
             product.setName(modifyProductReqBody.name());
         }

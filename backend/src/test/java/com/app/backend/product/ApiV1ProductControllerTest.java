@@ -440,6 +440,34 @@ public class ApiV1ProductControllerTest {
 
     @Test
     @CustomWithMockAdmin
+    @DisplayName("상품 등록 시 중복된 이름 사용 불가")
+    void addProductDuplicationTest() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        post("/api/v1/products")
+                                .content("""
+                                        {
+                                            "name": "상품 1",
+                                            "description": "testDescription",
+                                            "price": 25000,
+                                            "amount": 1500,
+                                            "status": true
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("add"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @CustomWithMockAdmin
     @DisplayName("상품 삭제")
     void deleteProductTest() throws Exception {
         ResultActions resultActions = mockMvc
@@ -531,6 +559,30 @@ public class ApiV1ProductControllerTest {
         assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("9500.00"));
         assertThat(product.getStock()).isEqualTo(100);
         assertThat(product.getStatus()).isTrue();
+    }
+
+    @Test
+    @CustomWithMockAdmin
+    @DisplayName("상품 이름 수정시 중복된 이름 사용 불가")
+    void modifyProductDuplicationTest() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(
+                        patch("/api/v1/products/2")
+                                .content("""
+                                        {
+                                            "name": "상품 1"
+                                        }
+                                        """.stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
