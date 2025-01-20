@@ -7,6 +7,10 @@ import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import NotFound404 from "./pages/NotFound404";
 import NewProduct from "./pages/NewProduct";
+import Mypage from "./pages/Mypage";
+import MyOrderList from "./pages/MyOrderList";
+
+import { OrderProvider } from "./context/OrderContext";
 
 import ProtectedRoute from "./pages/PrivateRoute";
 
@@ -23,7 +27,17 @@ function App() {
             path="/mypage"
             element={
               <ProtectedRoute>
-                <div>마이페이지 컴포넌트</div>
+                <Mypage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mypage/orders"
+            element={
+              <ProtectedRoute>
+                <OrderProvider>
+                  <MyOrderList />
+                </OrderProvider>
               </ProtectedRoute>
             }
           />
