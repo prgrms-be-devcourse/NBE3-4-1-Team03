@@ -92,4 +92,7 @@ public class Order extends BaseEntity {
         return this;
     }
 
+    public void updateTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
 }
