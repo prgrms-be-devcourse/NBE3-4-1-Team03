@@ -49,7 +49,6 @@ const useApi = () => {
       });
 
       const newAuthToken = response.headers["authorization"];
-      console.log(`AuthToken : ${newAuthToken}`);
       if (newAuthToken) {
         localStorage.setItem("Authorization", newAuthToken);
       }
@@ -57,7 +56,6 @@ const useApi = () => {
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || "Unknown error");
       }
-
       return response.data;
     } catch (err) {
       setError(err.response?.data || "An error occurred");
