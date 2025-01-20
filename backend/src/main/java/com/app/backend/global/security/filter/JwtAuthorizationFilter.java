@@ -89,8 +89,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private void reissueFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String refreshToken = getRefreshToken(request);
 
-        System.out.println(" 리프레시 검증하러 들어옴 ");
-
         if (refreshToken == null) {
             AuthResponseUtil.failLogin(
                     response,
